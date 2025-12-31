@@ -1,0 +1,43 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+	"project_name": "Rocket",
+	"languages": {
+		"Luau": {
+			"formatter": { "external": { "command": "stylua", "arguments": ["-"] } }
+		},
+		"JavaScript": {
+			"formatter": {
+				"external": {
+					"command": "bunx",
+					"arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+				}
+			},
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true
+			}
+		},
+		"TypeScript": {
+			"formatter": {
+				"external": {
+					"command": "bunx",
+					"arguments": ["prettier", "--stdin-filepath", "{buffer_path}"]
+				}
+			},
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true
+			}
+		}
+	},
+	"lsp": {
+		"luau-lsp": {
+			"settings": {
+				"ext": {
+					"roblox": { "enabled": true, "security_level": "plugin" }
+				}
+			}
+		}
+	}
+}

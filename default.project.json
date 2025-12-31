@@ -1,0 +1,23 @@
+{
+	"$schema": "https://raw.githubusercontent.com/rojo-rbx/vscode-rojo/master/schemas/project.template.schema.json",
+	"name": "Rocket",
+	"globIgnorePaths": ["node_modules/**/package.json", "**/tsconfig.json"],
+	"tree": {
+		"$className": "Folder",
+		"rocket": {
+			"$path": "out"
+		},
+		"include": {
+			"$path": "include",
+			"config": {
+				"$path": "temp/rocket.config.json"
+			},
+			"node_modules": {
+				"$className": "Folder",
+				"@rbxts": {
+					"$path": "node_modules/@rbxts"
+				}
+			}
+		}
+	}
+}
