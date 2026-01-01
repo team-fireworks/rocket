@@ -1,6 +1,6 @@
 local Selection = game:GetService("Selection")
 
-local Extension = require("@src/lib/Extension")
+local Extension = require("@src/Extension")
 local assets = require("@src/assets")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin

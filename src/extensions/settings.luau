@@ -1,7 +1,7 @@
-local Extension = require("@src/lib/Extension")
+local Extension = require("@src/Extension")
+local SettingsPages = require("@settings/SettingsPages")
+local SettingsStore = require("@settings/SettingsStore")
 local assets = require("@src/assets")
-local pages = require("@src/components/settings/pages")
-local settings = require("@src/atoms/settings")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
 local ext = Extension.new(plugin, {
@@ -12,15 +12,15 @@ local ext = Extension.new(plugin, {
 	authors = { "Team Fireworks" },
 })
 
-for _, page in pages do
+for _, page in SettingsPages do
 	ext:newCommand({
 		id = `page-{page.title}`,
 		title = page.title,
 		description = `Open the {page.title} panel in Rocket Settings`,
 		icon = { Image = page.extensionIcon },
 		run = function()
-			settings.currentPage(page)
-			settings.isVisible(true)
+			SettingsStore.currentPage(page)
+			SettingsStore.isVisible(true)
 		end,
 	})
 end

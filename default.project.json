@@ -9,7 +9,10 @@
 				"packages": {
 					"$path": "roblox_packages"
 				},
-				"manifest": {
+				"vendor": {
+					"$path": "./vendor"
+				},
+				"pesde.toml": {
 					"$path": "./pesde.toml"
 				}
 			}

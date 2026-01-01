@@ -7,27 +7,28 @@ local Selection = game:GetService("Selection")
 local UserInputService = game:GetService("UserInputService")
 
 local Charm = require("@pkgs/Charm")
-local Command = require("@src/lib/Command")
-local Extension = require("@src/lib/Extension")
-local Iris = require("@pkgs/Iris")
-local LauncherWindow = require("@src/components/launcher/LauncherWindow")
-local SettingsWindow = require("@src/components/settings/SettingsWindow")
+local Command = require("@src/Command")
+local Extension = require("@src/Extension")
+local Iris = require("@iris/Iris")
+local LauncherStore = require("@launcher/LauncherStore")
+local LauncherWindow = require("@launcher/LauncherWindow")
+local SettingsPages = require("@settings/SettingsPages")
+local SettingsStore = require("@settings/SettingsStore")
+local SettingsWindow = require("@settings/SettingsWindow")
+local Theme = require("@theme/Theme")
 local Trove = require("@pkgs/Trove")
-local assets = require("./assets")
-local launcher = require("@src/atoms/launcher")
-local pages = require("@src/components/settings/pages")
-local settings = require("@src/atoms/settings")
+local assets = require("@src/assets")
 
 local pluginTrove = Trove.new()
 pluginTrove:Add(plugin.Unloading:Connect(pluginTrove:WrapClean()))
 
 local function toggleIsLauncherVisible()
-	launcher.isVisible(not launcher.isVisible())
+	LauncherStore.isVisible(not LauncherStore.isVisible())
 end
 
 local function toggleIsSettingsVisible()
-	settings.currentPage(pages[1])
-	settings.isVisible(not settings.isVisible())
+	SettingsStore.currentPage(SettingsPages[1])
+	SettingsStore.isVisible(not SettingsStore.isVisible())
 end
 
 local function start()
@@ -64,11 +65,15 @@ local function start()
 	settingsButton.Click:Connect(toggleIsSettingsVisible)
 	launchAction.Triggered:Connect(toggleIsLauncherVisible)
 
+	Charm.subscribe(SettingsStore.isVisible, function(isVisible)
+		settingsButton:SetActive(isVisible)
+	end)
+
 	local launcherInputTrove = pluginTrove:Extend()
-	pluginTrove:Add(Charm.subscribe(launcher.isVisible, function(isVisible)
-		launcher.isFocused(false)
-		launcher.search("")
-		launcher.selectedIndex(1)
+	pluginTrove:Add(Charm.subscribe(LauncherStore.isVisible, function(isVisible)
+		LauncherStore.isFocused(false)
+		LauncherStore.search("")
+		LauncherStore.selectedIndex(1)
 		launchButton:SetActive(isVisible)
 		launcherInputTrove:Clean()
 
@@ -77,17 +82,19 @@ local function start()
 				local keycode = input.KeyCode
 
 				if keycode == Enum.KeyCode.Up then
-					launcher.selectedIndex(math.max(launcher.selectedIndex() - 1, 1))
+					LauncherStore.selectedIndex(math.max(LauncherStore.selectedIndex() - 1, 1))
 				elseif keycode == Enum.KeyCode.Down then
-					launcher.selectedIndex(math.min(launcher.selectedIndex() + 1, #launcher.searchResults()))
+					LauncherStore.selectedIndex(
+						math.min(LauncherStore.selectedIndex() + 1, #LauncherStore.searchResults())
+					)
 				elseif keycode == Enum.KeyCode.Return then
-					launcher.runCommand:Fire(Extension.allCommands()[launcher.selectedIndex()])
+					LauncherStore.runCommand:Fire(Extension.allCommands()[LauncherStore.selectedIndex()])
 				elseif keycode == Enum.KeyCode.Escape then
-					local commandContext = launcher.commandContext
+					local commandContext = LauncherStore.commandContext
 					if commandContext then
 						commandContext.trove:Clean()
 					else
-						launcher.isVisible(false)
+						LauncherStore.isVisible(false)
 					end
 				end
 			end))
@@ -109,7 +116,7 @@ local function start()
 				)
 
 				action.Triggered:Connect(function()
-					launcher.runCommand:Fire(cmd)
+					LauncherStore.runCommand:Fire(cmd)
 				end)
 
 				commandActions[cmd] = action
@@ -121,7 +128,7 @@ local function start()
 	task.spawn(createCommandPluginActions, Extension.allCommands())
 
 	local viewportCommands: { [Command.Command]: Command.CommandContext } = {}
-	pluginTrove:Add(launcher.runCommand:Connect(function(cmd: Command.Command)
+	pluginTrove:Add(LauncherStore.runCommand:Connect(function(cmd: Command.Command)
 		local cmdTrove = pluginTrove:Extend()
 		local ctx: Command.CommandContext = {
 			trove = cmdTrove,
@@ -147,14 +154,14 @@ local function start()
 			cmdTrove:Clean()
 		else
 			if renderInLauncher then
-				launcher.commandToRender = cmd
-				launcher.commandContext = ctx
+				LauncherStore.commandToRender = cmd
+				LauncherStore.commandContext = ctx
 				cmdTrove:Add(function()
-					if launcher.commandToRender == cmd then
-						launcher.commandToRender = nil
+					if LauncherStore.commandToRender == cmd then
+						LauncherStore.commandToRender = nil
 					end
-					if launcher.commandContext == ctx then
-						launcher.commandContext = nil
+					if LauncherStore.commandContext == ctx then
+						LauncherStore.commandContext = nil
 					end
 				end)
 				launcherInputTrove:Add(cmdTrove)
@@ -168,7 +175,7 @@ local function start()
 			end
 		end
 
-		launcher.isVisible(false)
+		LauncherStore.isVisible(false)
 	end))
 
 	local ui = pluginTrove:Add(Instance.new("ScreenGui"))
@@ -177,19 +184,14 @@ local function start()
 	ui.Parent = CoreGui
 
 	Iris.Init(ui :: any)
-	Iris.UpdateGlobalConfig(Iris.TemplateConfig.sizeClear :: any)
-	Iris.UpdateGlobalConfig({
-		RichText = true,
-		FrameBorderSize = 0,
-		IgnoreGuiInset = true,
-		TextFont = Font.fromEnum(Enum.Font.SourceSans),
-	})
-	Iris:Connect(function()
-		if launcher.isVisible() then
+	Iris.UpdateGlobalConfig(Theme.config() :: any)
+	pluginTrove:Add((Charm.subscribe :: any)(Theme.config, Iris.UpdateGlobalConfig))
+	Iris.Connect(getmetatable(Iris).__index, function()
+		if LauncherStore.isVisible() then
 			LauncherWindow()
 		end
 
-		if settings.isVisible() then
+		if SettingsStore.isVisible() then
 			SettingsWindow()
 		end
 
