@@ -7,7 +7,6 @@
 		"lune": "~/.lune/.typedefs/0.10.4/",
 		"pkgs": "roblox_packages",
 		"src": "src",
-		"iris": "src/iris",
 		"launcher": "src/launcher",
 		"settings": "src/settings",
 		"theme": "src/theme",

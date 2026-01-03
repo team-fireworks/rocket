@@ -6,7 +6,6 @@
 				"name": "path",
 				"sources": {
 					"@src": "./src",
-					"@iris": "./src/iris",
 					"@launcher": "./src/launcher",
 					"@settings": "./src/settings",
 					"@theme": "./src/theme",
