@@ -68,22 +68,14 @@ for _, source in sources do
 	for _, reposition in repositions do
 		local initial: types.RepositionState?
 		local hasInitiallyClicked = false
-
-		local title = `Reposition {source.title} by dragging {reposition.title}`
-
 		ext:newCommand({
 			id = `reposition-{source.id}-by-{reposition.id}`,
-			title = title,
+			title = `Reposition {source.title} by {reposition.title}`,
 			description = `Reposition the {source.title} by {reposition.describedBy}.`,
 			icon = { Image = source.icon },
 
 			run = function(ctx: Extension.CommandContext)
-				local identifier = ChangeHistoryService:TryBeginRecording(title)
-				if identifier then
-					ctx.trove:Add(function()
-						ChangeHistoryService:FinishRecording(identifier, Enum.FinishRecordingOperation.Commit)
-					end)
-				end
+				ctx:recordChanges()
 			end,
 
 			renderInViewport = function(ctx: Extension.CommandContext)

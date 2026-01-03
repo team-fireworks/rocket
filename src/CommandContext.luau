@@ -20,9 +20,9 @@ function CommandContext.new(command: any, plugin: Plugin, trove: Trove.Trove): C
 	return setmetatable({ command = command, trove = trove, mouse = plugin:GetMouse() }, CommandContext)
 end
 
-function CommandContext.recordChanges(self: CommandContext, id: string, title: string?)
+function CommandContext.recordChanges(self: CommandContext, id: string?, title: string?)
 	local changeId = ChangeHistoryService:TryBeginRecording(
-		self.command:formatId() .. "/" .. id,
+		if id then self.command:formatId() .. "/" .. id else self.command:formatId(),
 		if title then `Rocket - {self.command._metadata.title}: {title}` else `Rocket: {self.command._metadata.title}`
 	)
 
