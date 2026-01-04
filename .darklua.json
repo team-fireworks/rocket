@@ -11,7 +11,7 @@
 					"@theme": "./src/theme",
 					"@utils": "./src/utils",
 					"@vendor": "./vendor",
-					"@pkg": "./roblox_packages"
+					"@pkgs": "./roblox_packages"
 				}
 			},
 			"target": {
