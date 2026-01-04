@@ -35,7 +35,7 @@ LauncherStore.searchResults = Charm.computed(function(): { Command.Command }
 		end
 
 		for _, result in extensionResults do
-			for _, command in extensions[result[1]]._commands do
+			for _, command in extensions[result[1]].commands do
 				local commandIndex = commandToIndex[command]
 				local commandResult = combined[commandIndex]
 				if commandResult then

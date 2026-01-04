@@ -3,12 +3,11 @@ if not plugin then
 end
 
 local CoreGui = game:GetService("CoreGui")
-local Selection = game:GetService("Selection")
 local UserInputService = game:GetService("UserInputService")
 
 local Charm = require("@pkgs/Charm")
-local Command = require("@src/Command")
-local CommandContext = require("@src/CommandContext")
+local Command = require("@src/commands/Command")
+local CommandStore = require("@src/commands/CommandStore")
 local Extension = require("@src/Extension")
 local Gizmos = require("./Gizmos")
 local Iris = require("@src/Iris")
@@ -20,6 +19,7 @@ local SettingsWindow = require("@settings/SettingsWindow")
 local Theme = require("@theme/Theme")
 local Trove = require("@pkgs/Trove")
 local assets = require("@src/assets")
+local runCommand = require("@src/commands/runCommand")
 
 local pluginTrove = Trove.new()
 pluginTrove:Add(plugin.Unloading:Connect(pluginTrove:WrapClean()))
@@ -114,11 +114,9 @@ local function start()
 			if not commandActions[cmd] then
 				local action = createPluginAction(
 					`command/{cmd:formatId()}`,
-					cmd._metadata.title,
-					cmd._metadata.description,
-					cmd._metadata.icon and cmd._metadata.icon.Image
-						or cmd._extension._metadata.icon.Image
-						or assets.brand.rocket
+					cmd.metadata.title,
+					cmd.metadata.description,
+					cmd.metadata.icon and cmd.metadata.icon or cmd.extension.metadata.icon or assets.brand.rocket
 				)
 
 				action.Triggered:Connect(function()
@@ -132,54 +130,7 @@ local function start()
 
 	Charm.subscribe(Extension.allCommands, createCommandPluginActions)
 	task.spawn(createCommandPluginActions, Extension.allCommands())
-
-	local viewportCommands: { [Command.Command]: CommandContext.CommandContext } = {}
-	pluginTrove:Add(LauncherStore.runCommand:Connect(function(cmd: Command.Command)
-		local cmdTrove = pluginTrove:Extend()
-		local ctx = CommandContext.new(cmd, plugin, cmdTrove)
-
-		local run = cmd._metadata.run
-		local runSelected = cmd._metadata.runSelected
-		local renderInLauncher = cmd._metadata.renderInLauncher
-		local renderInViewport = cmd._metadata.renderInViewport
-
-		if run then
-			pcall(run, ctx)
-		end
-
-		if runSelected then
-			for _, instance in Selection:Get() do
-				pcall(runSelected, ctx, instance)
-			end
-		end
-
-		if not renderInLauncher and not renderInViewport then
-			cmdTrove:Clean()
-		else
-			if renderInLauncher then
-				LauncherStore.commandToRender = cmd
-				LauncherStore.commandContext = ctx
-				cmdTrove:Add(function()
-					if LauncherStore.commandToRender == cmd then
-						LauncherStore.commandToRender = nil
-					end
-					if LauncherStore.commandContext == ctx then
-						LauncherStore.commandContext = nil
-					end
-				end)
-				launcherInputTrove:Add(cmdTrove)
-				return
-			end
-			if renderInViewport then
-				viewportCommands[cmd] = ctx
-				cmdTrove:Add(function()
-					viewportCommands[cmd] = nil
-				end)
-			end
-		end
-
-		LauncherStore.isVisible(false)
-	end))
+	pluginTrove:Add(LauncherStore.runCommand:Connect(runCommand))
 
 	local ui = pluginTrove:Add(Instance.new("ScreenGui"))
 	ui.Name = "Rocket"
@@ -198,10 +149,27 @@ local function start()
 			SettingsWindow()
 		end
 
-		for _, cmd in Extension.allCommands() do
-			local ctx = viewportCommands[cmd]
-			if ctx then
-				(cmd._metadata.renderInViewport :: any)(ctx)
+		for command, commandUi in CommandStore.uiContexts() do
+			local ctx, result = commandUi.ctx, commandUi.result
+
+			if result.renderViewport then
+				pcall(result.renderViewport)
+			end
+
+			if result.renderWindow then
+				local window = Iris.Window(
+					{ command.metadata.title },
+					{ position = UserInputService:GetMouseLocation() :: any }
+				)
+
+				if window.closed() then
+					ctx:cleanup()
+					Iris.End()
+					continue
+				end
+
+				pcall(result.renderWindow)
+				Iris.End()
 			end
 		end
 

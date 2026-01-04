@@ -1,4 +1,4 @@
-local Command = require("@src/Command")
+local Command = require("@src/commands/Command")
 local Iris = require("@src/Iris")
 local Theme = require("@theme/Theme")
 local useExtensionPageState = require("./useExtensionPageState")
@@ -13,25 +13,25 @@ local function ExtensionInfo(state: useExtensionPageState.ExtensionPageState)
 	local isCommand = Command.is(asCmd)
 
 	Iris.Spacer(8)
-	Iris.SameLine(8, Enum.VerticalAlignment.Center)
-	Iris.Icon(selected._metadata.icon or asCmd._extension._metadata.icon, UDim2.fromOffset(32, 32))
-	Iris.Text(`<b>{selected._metadata.title}</b>`)
+	Iris.SameLine({ 8, Enum.VerticalAlignment.Center })
+	Iris.Image({ selected.metadata.icon or asCmd.extension.metadata.icon, UDim2.fromOffset(32, 32) })
+	Iris.Text({ `<b>{selected.metadata.title}</b>` })
 	Iris.End()
 
-	Iris.SeparatorText("Description")
-	Iris.Text(selected._metadata.description)
+	Iris.SeparatorText({ "Description" })
+	Iris.Text({ selected.metadata.description })
 
-	Iris.SeparatorText("Preferences")
+	Iris.SeparatorText({ "Preferences" })
 	Iris.Checkbox({ "Enabled" })
 	if isCommand then
 		Iris.Checkbox({ "Run on Startup" })
 	end
 
-	Iris.SeparatorText("Debug")
+	Iris.SeparatorText({ "Debug" })
 	Iris.PushConfig(Theme.presets.subtext)
-	Iris.Text(`ID: {selected._metadata.id}`)
+	Iris.Text({ `ID: {selected.metadata.id}` })
 	if isCommand then
-		Iris.Text(`Full ID: {asCmd:formatId()}`)
+		Iris.Text({ `Full ID: {asCmd:formatId()}` })
 	end
 	Iris.PopConfig()
 end

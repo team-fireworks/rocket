@@ -32,7 +32,7 @@ local function LauncherWindow()
 	local commandToRender, commandContext = launcher.commandToRender, launcher.commandContext
 	if commandToRender and commandContext then
 		local render, renderNav =
-			commandToRender._metadata.renderInLauncher, commandToRender._metadata.renderInLauncherNav
+			commandToRender.metadata.renderInLauncher, commandToRender.metadata.renderInLauncherNav
 
 		if renderNav then
 			Iris.SameLine()
@@ -88,11 +88,11 @@ local function LauncherWindow()
 			button.Instance.Size = UDim2.fromScale(1, 0)
 			button.Instance.LayoutOrder = i
 
-			Iris.Icon(cmd._metadata.icon or cmd._extension._metadata.icon, UDim2.fromOffset(18, 18))
-			Iris.Text(cmd._metadata.title)
+			Iris.Icon(cmd.metadata.icon or cmd._extension.metadata.icon, UDim2.fromOffset(18, 18))
+			Iris.Text(cmd.metadata.title)
 
 			Theme.push(Theme.presets.subtext)
-			Iris.Text(cmd._extension._metadata.title)
+			Iris.Text(cmd._extension.metadata.title)
 			Iris.PopConfig()
 
 			Iris.End()

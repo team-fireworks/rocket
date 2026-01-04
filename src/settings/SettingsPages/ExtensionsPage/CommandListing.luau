@@ -1,4 +1,4 @@
-local Command = require("@src/Command")
+local Command = require("@src/commands/Command")
 local Iris = require("@src/Iris")
 local useExtensionPageState = require("./useExtensionPageState")
 
@@ -7,8 +7,8 @@ local function CommandListing(cmd: Command.Command, state: useExtensionPageState
 	if group.clicked() then
 		state.selected:set(cmd)
 	end
-	Iris.Icon(cmd._metadata.icon or cmd._extension._metadata.icon, UDim2.fromOffset(18, 18))
-	Iris.Text(cmd._metadata.title)
+	Iris.Icon(cmd.metadata.icon or cmd.extension.metadata.icon, UDim2.fromOffset(18, 18))
+	Iris.Text({ cmd.metadata.title })
 	Iris.End()
 	return group
 end

@@ -46,12 +46,12 @@ local function ExtensionList(state: useExtensionPageState.ExtensionPageState)
 			continue
 		end
 
-		Iris.PushId(extension._metadata.id .. "/commands")
+		Iris.PushId(extension.metadata.id .. "/commands")
 		Iris.Indent().Instance.LayoutOrder = layoutOrder + 1
-		if next(extension._commands) == nil then
+		if next(extension.commands) == nil then
 			Iris.Text("<i>This extension has no commands.</i>")
 		else
-			for cmdIndex, cmd in extension._commands do
+			for cmdIndex, cmd in extension.commands do
 				row += 1
 				Iris.PushId(cmd:formatId())
 				Theme.push(getRowThemePreset(row, state, cmd))

@@ -9,9 +9,9 @@ local function ExtensionListing(
 	state: useExtensionPageState.ExtensionPageState,
 	layoutOrder: number
 )
-	local extensionIcon = extension._metadata.icon
+	local extensionIcon = extension.metadata.icon
 
-	Iris.PushId(extension._metadata.id)
+	Iris.PushId(extension.metadata.id)
 	local header = Iris.ButtonGroup(UDim2.fromScale(1, 0))
 	header.Instance.LayoutOrder = layoutOrder
 	if header.clicked() then
@@ -30,7 +30,7 @@ local function ExtensionListing(
 	end
 
 	Iris.Icon(extensionIcon, UDim2.fromOffset(18, 18))
-	Iris.Text(extension._metadata.title)
+	Iris.Text(extension.metadata.title)
 
 	Iris.PopId()
 	Iris.End()
