@@ -21,6 +21,16 @@ Extension.allCommands = Charm.computed(function(): { Command.Command }
 	return result
 end)
 
+Extension.extensionTitles = Charm.computed(function(): { string }
+	local allExtensions = Extension.allExtensions()
+	local result = table.create(#allExtensions) :: { string }
+	for ext in allExtensions do
+		table.insert(result, ext._metadata.title)
+	end
+	table.sort(result)
+	return result
+end)
+
 Extension.commandTitles = Charm.computed(function(): { string }
 	local allCommands = Extension.allCommands()
 	local result = table.create(#allCommands) :: { string }

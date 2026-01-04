@@ -1,34 +1,22 @@
 -- Inspired by EzLight and Elttob Relight
 -- Reposition logic partially based on EzLight
 
-local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Lighting = game:GetService("Lighting")
 local Selection = game:GetService("Selection")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local Extension = require("@src/Extension")
--- local Gizmos = require("@src/Gizmos")
 local assets = require("@src/assets")
+local repositions = require("@self/repositions")
 local types = require("@self/types")
 
 local TAU = math.pi * 2
--- local GIZMO_COLOR = Color3.fromHex("#AC7400")
--- local GIZMO_PROPERTIES: Gizmos.PartialProperties = { Color3 = GIZMO_COLOR }
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
-
 local sources = {
 	{ id = "sun", title = "Sun", longtitudeFactor = 1, icon = assets.extensions.lighting.sun },
 	{ id = "moon", title = "Moon", longtitudeFactor = -1, icon = assets.extensions.lighting.moon },
-}
-
-local repositions: { types.Reposition } = {
-	require("@self/repositions/CursorReposition"),
-	require("@self/repositions/FaceReposition"),
-	require("@self/repositions/LineReposition"),
-	require("@self/repositions/ReflectionReposition"),
-	require("@self/repositions/ShadowReposition"),
 }
 
 local ext = Extension.new(plugin, {
@@ -70,7 +58,7 @@ for _, source in sources do
 		local hasInitiallyClicked = false
 		ext:newCommand({
 			id = `reposition-{source.id}-by-{reposition.id}`,
-			title = `Reposition {source.title} by {reposition.title}`,
+			title = `Reposition the {source.title} by {reposition.title}`,
 			description = `Reposition the {source.title} by {reposition.describedBy}.`,
 			icon = { Image = source.icon },
 
