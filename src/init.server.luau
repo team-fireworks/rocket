@@ -7,6 +7,7 @@ local LogService = game:GetService("LogService")
 
 local Log = require("@self/utils/Log")
 local initLauncherInput = require("@src/bootstrap/initLauncherInput")
+local initPluginActions = require("@src/bootstrap/initPluginActions")
 local initToolbar = require("@self/bootstrap/initToolbar")
 local initUi = require("@src/bootstrap/initUi")
 local parseError = require("@src/utils/parseError")
@@ -14,18 +15,12 @@ local pluginTrove = require("@self/pluginTrove")
 local requireInstances = require("@src/utils/requireInstances")
 local types = require("@self/types")
 
-local function start(log: Log.Log)
-	log:trace("Requiring core extensions")
+local function start()
 	requireInstances(script:WaitForChild("extensions"):GetDescendants())
-
-	log:trace("Initializing toolbar")
 	initToolbar()
-
-	log:trace("Initializing launcher input")
-	initLauncherInput()
-
-	log:trace("Initializing UI")
 	initUi()
+	initLauncherInput()
+	initPluginActions()
 end
 
 do
