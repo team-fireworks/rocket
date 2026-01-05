@@ -1,11 +1,11 @@
 {
 	"name": "Rocket",
 	"tree": {
-		"$className": "Folder",
+		"$className": "Actor",
 		"Rocket": {
 			"$path": "out",
 			"include": {
-				"$className": "Folder",
+				"$path": "include",
 				"packages": {
 					"$path": "roblox_packages"
 				},

@@ -6,10 +6,7 @@
 				"name": "path",
 				"sources": {
 					"@src": "./src",
-					"@launcher": "./src/launcher",
-					"@settings": "./src/settings",
-					"@theme": "./src/theme",
-					"@utils": "./src/utils",
+					"@include": "./include",
 					"@vendor": "./vendor",
 					"@pkgs": "./roblox_packages"
 				}

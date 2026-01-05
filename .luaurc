@@ -5,12 +5,9 @@
 	},
 	"aliases": {
 		"lune": "~/.lune/.typedefs/0.10.4/",
-		"pkgs": "roblox_packages",
 		"src": "src",
-		"launcher": "src/launcher",
-		"settings": "src/settings",
-		"theme": "src/theme",
-		"utils": "src/utils",
-		"vendor": "vendor"
+		"include": "include",
+		"vendor": "vendor",
+		"pkgs": "roblox_packages"
 	}
 }
