@@ -1,5 +1,3 @@
-local UserInputService = game:GetService("UserInputService")
-
 local Command = require("@src/core/Command")
 local CommandScope = require("@src/core/CommandScope")
 local Iris = require("@src/Iris")
@@ -15,16 +13,20 @@ local function renderCommandResult(
 	end
 
 	if result.renderWindow then
+		if result.windowConfig then
+			Iris.PushConfig(table.clone(result.windowConfig))
+		end
+
 		local isOpened = Iris.State(true)
 		Iris.SetNextWidgetID(`{prefixId(command:formatId())}/window`)
-		Iris.Window(result.windowArgs :: any or { command.metadata.title }, {
-			isOpened = isOpened,
-			-- TODO: this doesnt update in subsequent reruns
-			position = UserInputService:GetMouseLocation(),
-		})
+		local window = Iris.Window(result.windowArgs :: any or { command.metadata.title }, { isOpened = isOpened })
+
+		if result.windowConfig then
+			Iris.PopConfig()
+		end
 
 		if isOpened.value then
-			result.renderWindow()
+			result.renderWindow(window)
 			Iris.End()
 			return
 		end

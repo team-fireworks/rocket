@@ -6,15 +6,13 @@ export type SpacerProps = {
 	All: UDim?,
 }
 
-local ZERO_UDIM = UDim.new()
+local DEFAULT_UDIM = UDim.new(0, 8)
 
-local function Spacer(props: SpacerProps)
-	local instance = Instance.new("Frame")
-	instance.Name = "Spacer"
-	instance.BackgroundTransparency = 1
-	instance.BorderSizePixel = 0
-	instance.Size = UDim2.new(props.X or props.All or ZERO_UDIM, props.Y or props.All or ZERO_UDIM)
-	Iris.Append(instance)
+local function Spacer(props: SpacerProps?)
+	Iris.Image({
+		"",
+		UDim2.new(props and (props.X or props.All) or DEFAULT_UDIM, props and (props.Y or props.All) or DEFAULT_UDIM),
+	})
 end
 
 return Spacer

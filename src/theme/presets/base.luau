@@ -67,7 +67,7 @@ local base: Iris.PartialConfig = {
 	ContentWidth = UDim.new(0.65, 0),
 	ContentHeight = UDim.new(0, 0),
 
-	WindowPadding = Vector2.new(12, 8),
+	WindowPadding = Vector2.new(4, 4),
 	WindowResizePadding = Vector2.new(8, 8),
 	FramePadding = Vector2.new(6, 4),
 	ItemSpacing = Vector2.new(8, 0),

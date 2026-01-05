@@ -1,7 +1,7 @@
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Selection = game:GetService("Selection")
 
-local Iris = require("@pkgs/Iris")
+local Iris = require("@src/Iris")
 local Log = require("@src/utils/Log")
 local Trove = require("@pkgs/Trove")
 local fzy = require("@vendor/fzy")

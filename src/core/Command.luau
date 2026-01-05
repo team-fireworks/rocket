@@ -1,4 +1,5 @@
 local CommandScope = require("./CommandScope")
+local Iris = require("@src/Iris")
 
 type CommandScope = CommandScope.CommandScope
 
@@ -6,19 +7,22 @@ export type CommandMetadata = {
 	read id: string,
 	read title: string,
 	read description: string,
+	read authors: { string }?,
 	read icon: string?,
 }
 
 export type CommandResult = {
 	renderViewport: () -> ()?,
-	renderWindow: () -> ()?,
+
+	renderWindow: (window: Iris.Window) -> ()?,
 	windowArgs: { unknown }?,
+	windowConfig: Iris.PartialConfig?,
 }
 
 export type CommandRunner =
-	| ((ctx: CommandScope) -> ())
-	| ((ctx: CommandScope) -> CommandResult)
-	| ((ctx: CommandScope) -> CommandResult?)
+	| ((scope: CommandScope) -> ())
+	| ((scope: CommandScope) -> CommandResult)
+	| ((scope: CommandScope) -> CommandResult?)
 
 local Command = {}
 Command.__index = Command
