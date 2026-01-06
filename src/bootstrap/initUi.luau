@@ -27,9 +27,9 @@ local function initUi()
 		end
 
 		local renderResults = CommandStore.renderResults()
-		local scopes = CommandStore.scopes()
+		local contexts = CommandStore.contexts()
 		for _, command in CommandStore.commandsWithRenderResults() do
-			renderCommandResult(command, renderResults[command], scopes)
+			renderCommandResult(command, renderResults[command], contexts)
 		end
 	end) :: any)
 

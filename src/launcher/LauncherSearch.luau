@@ -4,10 +4,12 @@ local widgets = require("@src/widgets")
 
 local function LauncherSearch()
 	Iris.PushConfig { FrameRounding = 0, FramePadding = Iris._config.FramePadding * 2 }
-	LauncherStore.search((widgets.InstantInputText({
+
+	LauncherStore.search((widgets.InstantInputText {
 		Hint = "Search commands...",
 		CaptureFocus = not LauncherStore.isFocused(),
-	}, { text = LauncherStore.search() })))
+	}))
+
 	LauncherStore.isFocused(true)
 	Iris.PopConfig()
 end

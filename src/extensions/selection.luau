@@ -20,8 +20,8 @@ ext:newCommand({
 	id = "select-children",
 	title = "Select Children",
 	description = "Selects children of the current selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(ctx: Extension.CommandContext)
+	ctx:recordChanges()
 	local oldSelection = Selection:Get()
 	local newSelection = table.clone(oldSelection)
 	for _, selected in oldSelection do
@@ -35,8 +35,8 @@ ext:newCommand({
 	id = "select-descendants",
 	title = "Select Descendants",
 	description = "Selects descendants of the current selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 	local oldSelection = Selection:Get()
 	local newSelection = table.clone(oldSelection)
 	for _, selected in oldSelection do
@@ -50,8 +50,8 @@ ext:newCommand({
 	id = "select-just-children",
 	title = "Select Just Children",
 	description = "Selects only the children of the current selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 	local newSelection = {}
 	for _, selected in Selection:Get() do
 		local children = selected:GetChildren()
@@ -64,8 +64,8 @@ ext:newCommand({
 	id = "select-just-descendants",
 	title = "Select Just Descendants",
 	description = "Selects only the descendants of the current selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 	local newSelection = {}
 	for _, selected in Selection:Get() do
 		local descendants = selected:GetDescendants()
@@ -78,8 +78,8 @@ ext:newCommand({
 	id = "select-just-first",
 	title = "Select Just First",
 	description = "Reduce to just your first selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 	Selection:Set({ Selection:Get()[1] })
 end)
 
@@ -87,8 +87,8 @@ ext:newCommand({
 	id = "select-just-last",
 	title = "Select Just Last",
 	description = "Reduce to just your last selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 	local oldSelection = Selection:Get()
 	Selection:Set({ oldSelection[#oldSelection] })
 end)
@@ -97,18 +97,18 @@ ext:newCommand({
 	id = "deselect-all",
 	title = "Deselect All",
 	description = "Clears your selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
-	scope:setSelection({})
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
+	context:setSelection({})
 end)
 
 ext:newCommand({
 	id = "destroy-selection",
 	title = "Destroy Selection",
 	description = "Destroys the selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
-	for _, instance in scope:getSelection() do
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
+	for _, instance in context:getSelection() do
 		pcall(game.Destroy, instance)
 	end
 end)
@@ -117,9 +117,9 @@ ext:newCommand({
 	id = "destroy-just-children",
 	title = "Destroy Just Children",
 	description = "Destroys just the children of the current selection.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
-	for _, parent in scope:getSelection() do
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
+	for _, parent in context:getSelection() do
 		for _, children in parent:GetChildren() do
 			pcall(game.Destroy, children)
 		end
@@ -131,8 +131,8 @@ ext:newCommand({
 	id = "rename-selection",
 	title = "Rename Selection",
 	description = "Renames the current selection to the given pattern.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 
 	local firstRun = true
 	local commandResult: Extension.CommandResult = {}
@@ -147,7 +147,7 @@ ext:newCommand({
 			window.state.size:set(windowSize)
 		end
 
-		local selection = scope:getSelection()
+		local selection = context:getSelection()
 
 		Iris.SameLine()
 

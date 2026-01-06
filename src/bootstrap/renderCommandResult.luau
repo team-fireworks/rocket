@@ -1,12 +1,13 @@
 local Command = require("@src/core/Command")
-local CommandScope = require("@src/core/CommandScope")
+local CommandContext = require("@src/core/CommandContext")
 local Iris = require("@src/Iris")
 local prefixId = require("@src/utils/prefixId")
+local types = require("@src/types")
 
 local function renderCommandResult(
 	command: Command.Command,
-	result: Command.CommandResult,
-	scopes: { [Command.Command]: CommandScope.CommandScope }
+	result: types.CommandResult,
+	contexts: { [Command.Command]: CommandContext.CommandContext }
 )
 	if result.renderViewport then
 		result.renderViewport()
@@ -32,7 +33,7 @@ local function renderCommandResult(
 		end
 
 		isOpened:set(true)
-		scopes[command]:cleanup()
+		contexts[command]:cleanup()
 		Iris.End()
 	end
 end

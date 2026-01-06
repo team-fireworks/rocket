@@ -17,7 +17,19 @@ if fs.isDir(process.cwd .. OUTPUT_DIR) then
 	fs.removeDir(process.cwd .. OUTPUT_DIR)
 end
 
-process.exec("rojo", { "sourcemap", "--output", "sourcemap.json" }, EXEC_OPTIONS)
-process.exec("darklua", { "process", INPUT_DIR, OUTPUT_DIR }, EXEC_OPTIONS)
-process.exec("rojo", { "build", if output == "model" then "--output" else "--plugin", "Rocket.rbxm" }, EXEC_OPTIONS)
-process.exit(0)
+fs.copy(INPUT_DIR, OUTPUT_DIR)
+
+local sourcemap = process.exec("rojo", { "sourcemap", "--output", "sourcemap.json" }, EXEC_OPTIONS)
+local darklua = process.exec("darklua", { "process", INPUT_DIR, OUTPUT_DIR }, EXEC_OPTIONS)
+local build = process.exec("rojo", {
+	"build",
+	if output == "model" then "--output" else "--plugin",
+	"Rocket.rbxm",
+	"build.project.json",
+}, EXEC_OPTIONS)
+
+if sourcemap.ok and darklua.ok and build.ok then
+	process.exit(0)
+end
+
+process.exit(1)

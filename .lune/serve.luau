@@ -3,10 +3,22 @@ local process = require("@lune/process")
 local richterm = require("@lib/richterm")
 local watch = require("@lib/watch")
 
-watch({ "src", "include", "roblox_packages" }, function()
+local function clearConsole()
+	print(string.rep("\n", 80))
+end
+
+watch({ "src", "include" }, function()
+	local timestamp = DateTime.now():formatLocalTime("%H:%M:%S")
+	local lastUpdatedAt = `Last updated at {timestamp}`
+
+	clearConsole()
+	print(richterm.bold(richterm.cyan "Rebuilding..."))
+	print(lastUpdatedAt)
+	print()
+
 	local result = process.exec("lune", { "run", "build", "plugin" })
 
-	print(string.rep("\n", 80))
+	clearConsole()
 	if result.ok then
 		print(richterm.bold(richterm.green "Build OK"))
 	else
@@ -14,7 +26,6 @@ watch({ "src", "include", "roblox_packages" }, function()
 		print()
 		print(richterm.bold(richterm.red "Build Failed"))
 	end
-
-	print(richterm.dim(`Last updated at {DateTime.now():formatLocalTime("%H:%M:%S")}`))
+	print(lastUpdatedAt)
 	print()
 end)

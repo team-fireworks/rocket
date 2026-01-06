@@ -61,19 +61,19 @@ ext:newCommand({
 	id = `fill-trusses`,
 	title = `Fill Trusses`,
 	description = `Fills the insides of selected TrussParts, then selects the fills.`,
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
-	scope:setSelection(fillRecursive(scope:getSelection()))
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
+	context:setSelection(fillRecursive(context:getSelection()))
 end)
 
 ext:newCommand({
 	id = "delete-truss-fill",
 	title = "Delete Truss Fill",
 	description = "Deletes fills in selected TrussParts that was created by this extension.",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(context: Extension.CommandContext)
+	context:recordChanges()
 
-	for _, selected in scope:getSelection() do
+	for _, selected in context:getSelection() do
 		if selected:HasTag(TRUSS_FILLER_TAG) then
 			selected:Destroy()
 			continue

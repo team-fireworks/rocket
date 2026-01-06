@@ -15,8 +15,8 @@ ext:newCommand({
 	id = "toggle-shadows",
 	title = "Toggle Shadows",
 	description = "Toggles Lighting's GlobalShadows property",
-}, function(scope: Extension.CommandScope)
-	scope:recordChanges()
+}, function(ctx: Extension.CommandContext)
+	ctx:recordChanges()
 	Lighting.GlobalShadows = not Lighting.GlobalShadows
 end)
 

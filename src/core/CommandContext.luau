@@ -5,68 +5,78 @@ local Iris = require("@src/Iris")
 local Log = require("@src/utils/Log")
 local Trove = require("@pkgs/Trove")
 local fzy = require("@vendor/fzy")
+local types = require("@src/types")
 local widgets = require("@src/widgets")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
 
 --[=[
-	@class CommandScope
+	@class CommandContext
 ]=]
-local CommandScope = {}
-CommandScope.__index = CommandScope
+local CommandContext = {}
+CommandContext.__index = CommandContext
 
 -- FIXME: vanilla Iris is used as Rocket's types is too complex
-CommandScope.Iris = Iris
-CommandScope.Gizmos = {}
-CommandScope.widgets = widgets
-CommandScope.fzy = fzy
+CommandContext.Iris = Iris
+CommandContext.Gizmos = {}
+CommandContext.widgets = widgets
+CommandContext.fzy = fzy
 
 -- LUAU: `CommandContext.command` is typed as any to avoid cyclic requires
-export type CommandScope = setmetatable<{
+export type CommandContext = setmetatable<{
 	read command: any,
 	read trove: Trove.Trove,
 	read log: Log.Log,
-}, typeof(CommandScope)>
+}, typeof(CommandContext)>
 
-function CommandScope.new(trove: Trove.Trove, command: any): CommandScope
+function CommandContext.new(trove: Trove.Trove, command: any): CommandContext
 	return table.freeze(setmetatable({
 		command = command,
 		trove = trove,
 		log = Log.new(tostring(command)),
-	}, CommandScope))
+	}, CommandContext))
 end
 
-function CommandScope.cleanup(self: CommandScope)
+function CommandContext.cleanup(self: CommandContext)
 	self.trove:Destroy()
 end
 
-function CommandScope:getSelection()
+function CommandContext:getSelection()
 	return Selection:Get()
 end
 
-function CommandScope:setSelection(instances: { Instance })
+function CommandContext:setSelection(instances: { Instance })
 	Selection:Set(instances)
 end
 
-function CommandScope:getMouse()
+function CommandContext:getMouse()
 	return assert(plugin:GetMouse())
 end
 
-function CommandScope.recordChanges(self: CommandScope, id: string?, title: string?)
+function CommandContext.recordChanges(self: CommandContext, id: string?, title: string?)
 	local changeId = ChangeHistoryService:TryBeginRecording(
 		if id then self.command:formatId() .. "/" .. id else self.command:formatId(),
 		if title then `Rocket - {self.command.metadata.title}: {title}` else `Rocket: {self.command.metadata.title}`
 	)
 
-	if changeId then
-		self.trove:Add(function()
+	local function finish()
+		if changeId then
 			ChangeHistoryService:FinishRecording(changeId, Enum.FinishRecordingOperation.Commit)
-		end)
+			self.trove:Remove(finish)
+		end
 	end
+
+	self.trove:Add(finish)
+
+	return finish
 end
 
-function CommandScope.__tostring(self: CommandScope)
-	return `CommandScope({string.format("%q", self.command:formatId())})`
+function CommandContext:newResult(): types.CommandResult
+	return {}
 end
 
-return table.freeze(CommandScope)
+function CommandContext.__tostring(self: CommandContext)
+	return `CommandContext({string.format("%q", self.command:formatId())})`
+end
+
+return table.freeze(CommandContext)

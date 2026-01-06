@@ -1,36 +1,37 @@
 local Command = require("./Command")
-local CommandScope = require("./CommandScope")
+local CommandContext = require("./CommandContext")
 local CommandStore = require("./CommandStore")
 local isRenderResult = require("./isRenderResult")
 local pluginTrove = require("@src/pluginTrove")
 local setTableAtom = require("@src/utils/setTableAtom")
+local types = require("@src/types")
 
 local function runCommand(command: Command.Command)
-	local existingScope = CommandStore.scopes()[command]
+	local existingScope = CommandStore.contexts()[command]
 	if existingScope then
 		existingScope.log:warn("Cannot concurrently run a command multiple times.")
 		return
 	end
 
 	local trove = pluginTrove:Extend()
-	local scope = CommandScope.new(trove, command)
+	local context = CommandContext.new(trove, command)
 
-	setTableAtom(CommandStore.scopes, command, scope)
+	setTableAtom(CommandStore.contexts, command, context)
 	trove:Add(function()
-		setTableAtom(CommandStore.scopes, command, nil :: never)
+		setTableAtom(CommandStore.contexts, command, nil :: never)
 		setTableAtom(CommandStore.renderResults, command, nil :: never)
 	end)
 
-	scope.log:trace("Running command", command:formatId())
+	context.log:trace("Running command", command:formatId())
 
-	local runSuccess, runResult: Command.CommandResult = pcall(command.runner :: any, scope)
+	local runSuccess, runResult: types.CommandResult = pcall(command.runner :: any, context)
 	if runSuccess then
 		if isRenderResult(runResult) then
 			setTableAtom(CommandStore.renderResults, command, runResult)
 			return
 		end
 	else
-		scope.log:error("Failed to run command:", runResult)
+		context.log:error("Failed to run command:", runResult)
 	end
 
 	trove:Destroy()

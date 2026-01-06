@@ -1,10 +1,11 @@
 local Charm = require("@pkgs/Charm")
 local Command = require("./Command")
-local CommandScope = require("./CommandScope")
+local CommandContext = require("./CommandContext")
+local types = require("@src/types")
 
 local CommandStore = {}
-CommandStore.scopes = Charm.atom({} :: { [Command.Command]: CommandScope.CommandScope })
-CommandStore.renderResults = Charm.atom({} :: { [Command.Command]: Command.CommandResult })
+CommandStore.contexts = Charm.atom({} :: { [Command.Command]: CommandContext.CommandContext })
+CommandStore.renderResults = Charm.atom({} :: { [Command.Command]: types.CommandResult })
 
 CommandStore.commandsWithRenderResults = Charm.computed(function()
 	local result = {}

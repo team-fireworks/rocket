@@ -1,20 +1,13 @@
 local Charm = require("@pkgs/Charm")
 local Command = require("@src/core/Command")
-local CommandScope = require("@src/core/CommandScope")
+local CommandContext = require("@src/core/CommandContext")
 local Log = require("@src/utils/Log")
+local types = require("@src/types")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-export type CommandResult = Command.CommandResult
-export type CommandScope = CommandScope.CommandScope
-
-export type ExtensionMetadata = {
-	id: string,
-	title: string,
-	description: string,
-	icon: string,
-	authors: { string },
-}
+export type CommandResult = types.CommandResult
+export type CommandContext = CommandContext.CommandContext
 
 local log = Log.new(script)
 
@@ -24,8 +17,53 @@ Extension.__index = Extension
 export type Extension = setmetatable<{
 	read _plugin: Plugin,
 	read commands: { Command.Command },
-	read metadata: ExtensionMetadata,
+	read metadata: types.ExtensionMetadata,
 }, typeof(Extension)>
+
+-- TODO: flow to validate third party plugins
+function Extension.new(extPlugin: Plugin, extMetadata: types.ExtensionMetadata): Extension
+	if Extension._extensionsById()[extMetadata.id] then
+		error(`Extension conflicts with id: {extMetadata.id}`)
+	end
+	local self = setmetatable({ _plugin = extPlugin, metadata = extMetadata, commands = {} }, Extension)
+	local allExtensions = table.clone(Extension._allExtensions())
+	allExtensions[self] = true
+	Extension._allExtensions(allExtensions)
+	log:trace("Registered new extension:", extMetadata.id)
+	return table.freeze(self)
+end
+
+function Extension.is(x: unknown)
+	return typeof(x) == "table" and getmetatable(x) == Extension
+end
+
+function Extension.isCore(self: Extension)
+	return self._plugin == plugin
+end
+
+function Extension.newCommand(
+	self: Extension,
+	commandMetadata: types.CommandMetadata,
+	commandRunner: Command.CommandRunner
+)
+	local command = Command.new(self, commandMetadata, commandRunner)
+	log:trace("Extension", self.metadata.id, "registered new command", commandMetadata.id)
+	table.insert(self.commands, command)
+end
+
+function Extension.destroy(self: Extension)
+	local allExtensions = table.clone(Extension._allExtensions())
+	allExtensions[self] = nil
+	Extension._allExtensions(allExtensions)
+end
+
+function Extension.compareByTitle(lhs: Extension, rhs: Extension): boolean
+	return lhs.metadata.title < rhs.metadata.title
+end
+
+function Extension.__tostring(self: Extension)
+	return `Extension({string.format("%q", self.metadata.id)})`
+end
 
 Extension._allExtensions = Charm.atom({} :: { [Extension]: true })
 
@@ -82,50 +120,5 @@ Extension._commandTitles = Charm.computed(function(): { string }
 	end
 	return result
 end)
-
--- TODO: flow to validate third party plugins
-function Extension.new(extPlugin: Plugin, extMetadata: ExtensionMetadata): Extension
-	if Extension._extensionsById()[extMetadata.id] then
-		error(`Extension conflicts with id: {extMetadata.id}`)
-	end
-	local self = setmetatable({ _plugin = extPlugin, metadata = extMetadata, commands = {} }, Extension)
-	local allExtensions = table.clone(Extension._allExtensions())
-	allExtensions[self] = true
-	Extension._allExtensions(allExtensions)
-	log:trace("Registered new extension:", extMetadata.id)
-	return table.freeze(self)
-end
-
-function Extension.is(x: unknown)
-	return typeof(x) == "table" and getmetatable(x) == Extension
-end
-
-function Extension.isCore(self: Extension)
-	return self._plugin == plugin
-end
-
-function Extension.newCommand(
-	self: Extension,
-	commandMetadata: Command.CommandMetadata,
-	commandRunner: Command.CommandRunner
-)
-	local command = Command.new(self, commandMetadata, commandRunner)
-	log:trace("Extension", self.metadata.id, "registered new command", commandMetadata.id)
-	table.insert(self.commands, command)
-end
-
-function Extension.destroy(self: Extension)
-	local allExtensions = table.clone(Extension._allExtensions())
-	allExtensions[self] = nil
-	Extension._allExtensions(allExtensions)
-end
-
-function Extension.compareByTitle(lhs: Extension, rhs: Extension): boolean
-	return lhs.metadata.title < rhs.metadata.title
-end
-
-function Extension.__tostring(self: Extension)
-	return `Extension({string.format("%q", self.metadata.id)})`
-end
 
 return table.freeze(Extension)

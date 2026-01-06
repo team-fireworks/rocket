@@ -2,7 +2,7 @@ local DateTime = require("@lune/datetime")
 local fs = require("@lune/fs")
 local task = require("@lune/task")
 
-local CHECK_SOMETIMES = 10
+local CHECK_SOMETIMES = 20
 
 local function readDirRecursive(dir: string): { string }
 	local result = {}
@@ -65,6 +65,9 @@ local function watch(paths: { string }, callback: () -> ())
 			nextIndex += 1
 
 			update = update or check(nextIndex)
+			if update then
+				break
+			end
 		end
 
 		if update then

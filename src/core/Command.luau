@@ -1,28 +1,12 @@
-local CommandScope = require("./CommandScope")
-local Iris = require("@src/Iris")
+local CommandContext = require("./CommandContext")
+local types = require("@src/types")
 
-type CommandScope = CommandScope.CommandScope
-
-export type CommandMetadata = {
-	read id: string,
-	read title: string,
-	read description: string,
-	read authors: { string }?,
-	read icon: string?,
-}
-
-export type CommandResult = {
-	renderViewport: () -> ()?,
-
-	renderWindow: (window: Iris.Window) -> ()?,
-	windowArgs: { unknown }?,
-	windowConfig: Iris.PartialConfig?,
-}
+type CommandContext = CommandContext.CommandContext
 
 export type CommandRunner =
-	| ((scope: CommandScope) -> ())
-	| ((scope: CommandScope) -> CommandResult)
-	| ((scope: CommandScope) -> CommandResult?)
+	| ((context: CommandContext) -> ())
+	| ((context: CommandContext) -> types.CommandResult)
+	| ((context: CommandContext) -> types.CommandResult?)
 
 local Command = {}
 Command.__index = Command
@@ -30,11 +14,11 @@ Command.__index = Command
 -- LUAU: `Command.extension` is typed as any to avoid cyclic requires
 export type Command = setmetatable<{
 	read extension: any,
-	read metadata: CommandMetadata,
+	read metadata: types.CommandMetadata,
 	read runner: CommandRunner,
 }, typeof(Command)>
 
-function Command.new(extension: any, metadata: CommandMetadata, runner: CommandRunner): Command
+function Command.new(extension: any, metadata: types.CommandMetadata, runner: CommandRunner): Command
 	return table.freeze(setmetatable({
 		extension = extension,
 		metadata = table.freeze(table.clone(metadata)),

@@ -15,9 +15,9 @@ ext:newCommand({
 	id = "kill-all-commands",
 	title = "Kill All Commands",
 	description = "Kills all currently running commands.",
-}, function(scope: Extension.CommandScope)
-	for _, otherScope in CommandStore.scopes() do
-		if otherScope ~= scope then
+}, function(ctx: Extension.CommandContext)
+	for _, otherScope in CommandStore.contexts() do
+		if otherScope ~= ctx then
 			otherScope:cleanup()
 		end
 	end
