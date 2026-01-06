@@ -127,28 +127,19 @@ ext:newCommand({
 		local mouseDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
 		local selectedPartState = Iris.State(mouse.Target)
 		local selectedSurfaceState = Iris.State(mouse.TargetSurface)
-		local targetCFrameState = Iris.State(CFrame.identity)
-		local targetSizeState = Iris.State(Vector3.zero)
+		local target = mouse.Target
 
-		if not mouseIsInWindow then
-			local target = mouse.Target
-
+		if not mouseIsInWindow and target then
 			SurfaceSelectionGizmo(target, mouse.TargetSurface)
 
 			if mouseDown then
 				selectedPartState:set(mouse.Target)
 				selectedSurfaceState:set(mouse.TargetSurface)
-				targetCFrameState:set(target.CFrame)
-				targetSizeState:set(target.Size)
 			end
 		end
 
-		BoundingBoxGizmo(targetCFrameState:get() * CFrame.new(0, 2, 0), targetSizeState:get())
-
 		local selectedPart = selectedPartState:get()
 		local selectedSurface = selectedSurfaceState:get()
-
-		SurfaceSelectionGizmo(selectedPart, selectedSurface)
 
 		Iris.Text(`Part: {if selectedPart then selectedPart:GetFullName() else "none"}`)
 		Iris.Text(`Face: {if selectedSurface then selectedSurface.Name else "none"}`)
@@ -162,19 +153,83 @@ ext:newCommand({
 		local angleState = Iris.State(0)
 		Iris.SliderNum({ "Angle", 1, -180, 180 }, { number = angleState })
 
-		--[[
-		commenting for draft pr. working on the math rn :)
+		local previewCFrame: CFrame? = nil
+		if selectedPart and selectedSurface then
+			local angle = math.rad(angleState:get())
+			local rotationType = rotationTypeState:get()
+			local cframe = selectedPart.CFrame
+			local size = selectedPart.Size
 
-		local axisOfRotation = Vector3.zero
+			-- CFrame.identity is a placeholder :D
+			local offset = CFrame.identity
+			local pivot_offset = CFrame.identity
+			local angle_cframe = CFrame.identity
 
-		if selectedSurface == Enum.NormalId.Top then
-		elseif selectedSurface == Enum.NormalId.Bottom then
-		elseif selectedSurface == Enum.NormalId.Left then
-		elseif selectedSurface == Enum.NormalId.Right then
-		elseif selectedSurface == Enum.NormalId.Front then
-		elseif selectedSurface == Enum.NormalId.Back then
+			if selectedSurface == Enum.NormalId.Top then
+				offset = CFrame.new(0, size.Y, 0)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(0, -size.Y / 2, math.sign(angle) * -size.Z / 2)
+					angle_cframe = CFrame.Angles(angle, 0, 0)
+				elseif rotationType == "Yaw" then -- the correct term here is "Roll"... but when have we ever cared about correctness.... smh.....
+					pivot_offset = CFrame.new(math.sign(angle) * size.X / 2, -size.Y / 2, 0)
+					angle_cframe = CFrame.Angles(0, 0, angle)
+				end
+			elseif selectedSurface == Enum.NormalId.Bottom then
+				offset = CFrame.new(0, -size.Y, 0)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(0, size.Y / 2, math.sign(angle) * size.Z / 2)
+					angle_cframe = CFrame.Angles(angle, 0, 0)
+				elseif rotationType == "Yaw" then
+					pivot_offset = CFrame.new(math.sign(angle) * -size.X / 2, size.Y / 2, 0)
+					angle_cframe = CFrame.Angles(0, 0, angle)
+				end
+			elseif selectedSurface == Enum.NormalId.Left then
+				offset = CFrame.new(-size.X, 0, 0)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(size.X / 2, math.sign(angle) * size.Y / 2, 0)
+					angle_cframe = CFrame.Angles(0, 0, angle)
+				elseif rotationType == "Yaw" then
+					pivot_offset = CFrame.new(size.X / 2, 0, math.sign(angle) * -size.Z / 2)
+					angle_cframe = CFrame.Angles(0, angle, 0)
+				end
+			elseif selectedSurface == Enum.NormalId.Right then
+				offset = CFrame.new(size.X, 0, 0)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(-size.X / 2, math.sign(angle) * -size.Y / 2, 0)
+					angle_cframe = CFrame.Angles(0, 0, angle)
+				elseif rotationType == "Yaw" then
+					pivot_offset = CFrame.new(-size.X / 2, 0, math.sign(angle) * size.Z / 2)
+					angle_cframe = CFrame.Angles(0, angle, 0)
+				end
+			elseif selectedSurface == Enum.NormalId.Front then
+				offset = CFrame.new(0, 0, -size.Z)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(0, math.sign(angle) * -size.Y / 2, size.Z / 2)
+					angle_cframe = CFrame.Angles(angle, 0, 0)
+				elseif rotationType == "Yaw" then
+					pivot_offset = CFrame.new(math.sign(angle) * size.X / 2, 0, size.Z / 2)
+					angle_cframe = CFrame.Angles(0, angle, 0)
+				end
+			elseif selectedSurface == Enum.NormalId.Back then
+				offset = CFrame.new(0, 0, size.Z)
+
+				if rotationType == "Pitch" then
+					pivot_offset = CFrame.new(0, math.sign(angle) * size.Y / 2, -size.Z / 2)
+					angle_cframe = CFrame.Angles(angle, 0, 0)
+				elseif rotationType == "Yaw" then
+					pivot_offset = CFrame.new(math.sign(angle) * -size.X / 2, 0, -size.Z / 2)
+					angle_cframe = CFrame.Angles(0, angle, 0)
+				end
+			end
+
+			previewCFrame = cframe * offset * pivot_offset * angle_cframe * pivot_offset:Inverse()
+			BoundingBoxGizmo(previewCFrame, size)
 		end
-		]]
 
 		local amountState = Iris.State(1)
 		Iris.InputNum({ "Amount", 1, 1 }, { number = amountState })
@@ -185,7 +240,15 @@ ext:newCommand({
 		end
 
 		Iris.SameLine()
-		Iris.Button(`Render ({amountState:get()})`)
+
+		if Iris.Button(`Render ({amountState:get()})`).clicked() and previewCFrame then
+			local clone = selectedPart:Clone()
+			clone.CFrame = previewCFrame
+			clone.Parent = workspace
+
+			selectedPartState:set(clone)
+		end
+
 		Iris.Button(`Render All ({renderAllCount})`)
 		Iris.End()
 
