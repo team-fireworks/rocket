@@ -1,6 +1,4 @@
--- Vendored from luau-lang/lute under the MIT License:
--- https://github.com/luau-lang/lute/blob/primary/batteries/richterm.luau
-
+--#selene: allow(bad_string_escape, shadowing)
 --[[
 	richterm
 	terminal ansi formatter

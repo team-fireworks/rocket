@@ -7,6 +7,22 @@
 	"file_types": {
 		"JSONC": [".luaurc"]
 	},
+	"file_scan_exclusions": [
+		"**/.git",
+		"**/.svn",
+		"**/.hg",
+		"**/.jj",
+		"**/CVS",
+		"**/.DS_Store",
+		"**/Thumbs.db",
+		"**/.classpath",
+		"**/.settings",
+		".git",
+		"out",
+		"roblox.d.luau",
+		"Rocket.rbxm",
+		"pesde.lock"
+	],
 	"languages": {
 		"Luau": {
 			"formatter": {
