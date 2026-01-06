@@ -1,29 +1,20 @@
-local fs = require("@lune/fs")
+local DateTime = require("@lune/datetime")
 local process = require("@lune/process")
-local task = require("@lune/task")
+local richterm = require("@lib/richterm")
+local watch = require("@lib/watch")
 
-pcall(fs.removeDir, "out")
-pcall(fs.removeFile, "sourcemap.json")
+watch({ "src", "include", "roblox_packages" }, function()
+	local result = process.exec("lune", { "run", "build", "plugin" })
 
-process.exec("rojo", { "sourcemap", "--output", "sourcemap.json" }, { stdio = "inherit" } :: process.ExecOptions?)
+	print(string.rep("\n", 80))
+	if result.ok then
+		print(richterm.bold(richterm.green "Build OK"))
+	else
+		print(result.stderr)
+		print()
+		print(richterm.bold(richterm.red "Build Failed"))
+	end
 
-task.spawn(
-	process.exec,
-	"rojo",
-	{ "sourcemap", "--watch", "--output", "sourcemap.json" },
-	{ stdio = "inherit" } :: process.ExecOptions?
-)
-
-task.spawn(
-	process.exec,
-	"darklua",
-	{ "process", "--watch", "src", "out" },
-	{ stdio = "inherit" } :: process.ExecOptions?
-)
-
-task.spawn(
-	process.exec,
-	"rojo",
-	{ "build", "--watch", "--plugin", "rocket.rbxm", "build.project.json" },
-	{ stdio = "inherit" } :: process.ExecOptions?
-)
+	print(richterm.dim(`Last updated at {DateTime.now():formatLocalTime("%H:%M:%S")}`))
+	print()
+end)
