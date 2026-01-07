@@ -204,7 +204,7 @@ local function renderArcs(
 		end
 	end
 
-	return instances
+	return current
 end
 
 ext:newCommand({
