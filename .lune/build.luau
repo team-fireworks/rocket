@@ -19,5 +19,9 @@ end
 
 process.exec("rojo", { "sourcemap", "--output", "sourcemap.json" }, EXEC_OPTIONS)
 process.exec("darklua", { "process", INPUT_DIR, OUTPUT_DIR }, EXEC_OPTIONS)
-process.exec("rojo", { "build", if output == "model" then "--output" else "--plugin", "Rocket.rbxm" }, EXEC_OPTIONS)
+process.exec(
+	"rojo",
+	{ "build", if output == "model" then "--output" else "--plugin", "Rocket.rbxm", "build.project.json" },
+	EXEC_OPTIONS
+)
 process.exit(0)
