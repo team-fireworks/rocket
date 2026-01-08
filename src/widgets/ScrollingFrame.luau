@@ -34,7 +34,7 @@ Internal.WidgetConstructor(
 			frame.ScrollBarThickness = Iris._config.ScrollbarSize
 			frame.ScrollBarImageTransparency = Iris._config.ScrollbarGrabTransparency
 
-			widgets.UIListLayout(frame, Enum.FillDirection.Vertical, UDim.new(0, Iris._config.ItemSpacing.Y))
+			widgets.UIListLayout(frame, Enum.FillDirection.Vertical, UDim.new(0, Internal._config.ItemSpacing.Y))
 
 			return frame
 		end,
@@ -49,7 +49,7 @@ Internal.WidgetConstructor(
 		end,
 		GenerateState = function(thisWidget)
 			if thisWidget.state.scrollPosition == nil then
-				thisWidget.state.scrollPosition = Iris.Internal._widgetState(thisWidget, "scrollPosition", Vector2.zero)
+				thisWidget.state.scrollPosition = Internal._widgetState(thisWidget, "scrollPosition", Vector2.zero)
 			end
 		end,
 		UpdateState = function(thisWidget)

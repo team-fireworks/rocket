@@ -10,6 +10,8 @@ local widgets = table.freeze {
 	Spacer = require("@self/styling/Spacer"),
 
 	Subtext = require("@self/typography/Subtext"),
+
+	List = require("@self/List"),
 }
 
 return widgets
