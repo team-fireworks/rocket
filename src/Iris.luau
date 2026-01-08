@@ -1,5 +1,5 @@
 local Iris = require("@pkgs/Iris")
-local typeforge = require("@vendor/typeforge")
+local typeforge = require("@include/typeforge")
 local types = require("@include/types")
 
 type Cleanup = () -> ()

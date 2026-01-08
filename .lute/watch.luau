@@ -71,10 +71,12 @@ local function watchRecursive(dir: string)
 			numFiles += 1
 			continue
 		end
+
 		if watchers[fullPath] == nil then
 			watchers[fullPath] = fs.watch(fullPath, setRebuildNeeded)
 			numDirs += 1
 		end
+
 		watchRecursive(fullPath)
 	end
 end
@@ -84,9 +86,11 @@ function watchRocket()
 	watchRecursive(path.format(path.join(cwd, config.EXTENSIONS_DIR)))
 end
 
-watchRocket()
-while task.wait(0.1) do
-	if needsRebuild then
-		rebuild()
+do
+	watchRocket()
+	while task.wait(0.1) do
+		if needsRebuild then
+			rebuild()
+		end
 	end
 end

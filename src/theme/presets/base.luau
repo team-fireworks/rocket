@@ -2,12 +2,12 @@ local Iris = require "@src/Iris"
 
 local base: Iris.PartialConfig = {
 	TextTransparency = 0,
-	TextDisabledTransparency = 0,
+	TextDisabledTransparency = 0.5,
 
 	BorderTransparency = 0.5,
 	BorderActiveTransparency = 0.3,
 
-	WindowBgTransparency = 0,
+	WindowBgTransparency = 0.5,
 	PopupBgTransparency = 0,
 
 	ScrollbarGrabTransparency = 0,
@@ -18,13 +18,13 @@ local base: Iris.PartialConfig = {
 
 	MenubarBgTransparency = 0,
 
-	FrameBgTransparency = 0.46,
-	FrameBgHoveredTransparency = 0.46,
+	FrameBgTransparency = 0.5,
+	FrameBgHoveredTransparency = 0.5,
 	FrameBgActiveTransparency = 0.33,
 
-	ButtonTransparency = 0.6,
-	ButtonHoveredTransparency = 0,
-	ButtonActiveTransparency = 0,
+	ButtonTransparency = 0.5,
+	ButtonHoveredTransparency = 0.25,
+	ButtonActiveTransparency = 0.375,
 
 	ImageTransparency = 0,
 

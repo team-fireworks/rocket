@@ -1,16 +1,18 @@
+local Summon = require("@lib/Summon")
 local cli = require("@batteries/cli")
-local config = require("../rocket.config")
+local config = require("@lib/config")
 local fs = require("@std/fs")
 local path = require("@std/path")
 local process = require("@lute/process")
-
-local RUN_OPTIONS: process.ProcessRunOptions = { stdio = "inherit" }
+local tableext = require("@std/tableext")
 
 local args = cli.parser()
 args:add("output", "positional", { help = "Output as a 'plugin' or 'model'", required = true })
 args:add("mark-language-mode", "option", { help = "Marks 'strict', 'nonstrict', or 'nocheck' language mode" })
 args:add("mark-optimization-level", "option", { help = "Marks '0', '1', or '2' optimization level" })
 args:add("mark-attribution", "flag", { help = "Include Rocket's attribution comment" })
+
+local cwd = process.cwd()
 
 local function createHeaderComment()
 	local headerComment = {}
@@ -30,7 +32,8 @@ local function createHeaderComment()
 	end
 
 	if args:has("mark-attribution") then
-		table.insert(headerComment, `-- Copyright (c) 2025–2026 The Rocket Authors`)
+		table.insert(headerComment, `-- {config.copyright}:`)
+		table.insert(headerComment, `-- https://github.com/team-fireworks/rocket`)
 		table.insert(headerComment, `--`)
 		table.insert(headerComment, `-- This Source Code Form is subject to the terms of the Mozilla Public License,`)
 		table.insert(headerComment, `-- v. 2.0. If a copy of the MPL was not distributed with this file, You can`)
@@ -41,92 +44,98 @@ local function createHeaderComment()
 	return headerComment
 end
 
-local commandArgs = { ... }
-table.remove(commandArgs, 1)
-if #commandArgs == 0 or commandArgs[1] == "help" then
-	args:help()
-	return
-end
+local function copy(from: string, to: string)
+	local walkInput = fs.walk(from, { recursive = true })
+	local entry = walkInput()
+	local copied = {}
 
-args:parse(commandArgs)
-
-local cwd = process.cwd()
-
-local model = "Rocket.rbxm"
-local inputPath, outputPath = path.join(cwd, config.INPUT_DIR), path.join(cwd, config.OUTPUT_DIR)
-local inputFormatted = path.format(inputPath)
-local headerComment = createHeaderComment()
-local shouldAddHeaderComment, headerCommentFormatted = #headerComment > 0, table.concat(headerComment, "\n")
-
-if fs.exists(outputPath) then
-	fs.removedirectory(outputPath, { recursive = true })
-end
-
--- `fs.copy` doesn't work bro
-local walkInput = fs.walk(inputPath, { recursive = true })
-local entry = walkInput()
-local outputPaths = {}
-while entry do
-	local relative = string.sub(path.format(entry), #inputFormatted + 2)
-	local destination = path.join(outputPath, relative)
-	if fs.type(entry) == "file" then
-		fs.createdirectory(path.dirname(destination), { makeparents = true })
-		fs.copy(entry, destination)
-		outputPaths[destination] = true
-		print(destination)
+	while entry do
+		local relative = string.sub(path.format(entry), #from + 2)
+		local destination = path.join(to, relative)
+		if fs.type(entry) == "file" then
+			fs.createdirectory(path.dirname(destination), { makeparents = true })
+			fs.copy(entry, destination)
+			copied[destination] = true
+		end
+		entry = walkInput()
 	end
-	entry = walkInput()
+
+	return copied
 end
 
-local sourcemapPath = path.join(cwd, "sourcemap.json")
-if fs.exists(sourcemapPath) then
-	fs.remove(sourcemapPath)
-end
+local function prepareTooling()
+	local output = args:get("output")
+	local modelPath = path.join(cwd, config.build.model)
 
-local sourcemap = process.run({
-	"rojo",
-	"sourcemap",
-	"--output",
-	"sourcemap.json",
-}, RUN_OPTIONS)
+	if output == "model" and fs.exists(modelPath) then
+		fs.remove(modelPath)
+	end
 
-local darklua = process.run({
-	"darklua",
-	"process",
-	config.INPUT_DIR,
-	config.OUTPUT_DIR,
-}, RUN_OPTIONS)
-
-local darkluaExtensions = process.run({
-	"darklua",
-	"process",
-	config.EXTENSIONS_DIR,
-	path.format(path.join(config.OUTPUT_DIR, config.EXTENSIONS_DIR)),
-}, RUN_OPTIONS)
-
-if shouldAddHeaderComment then
-	for out in outputPaths do
-		fs.writestringtofile(out, headerCommentFormatted .. fs.readfiletostring(out))
+	local sourcemapPath = path.join(cwd, config.sourcemap.filename)
+	if fs.exists(sourcemapPath) then
+		fs.remove(sourcemapPath)
 	end
 end
 
-local output = args:get("output")
-local modelPath = path.join(cwd, model)
-if output == "model" and fs.exists(modelPath) then
-	fs.remove(modelPath)
+local function prepareOutput()
+	local output = path.join(cwd, config.build.output)
+	if fs.exists(path.join(cwd, config.build.output)) then
+		fs.removedirectory(output, { recursive = true })
+	end
+
+	return tableext.combine(
+		copy(path.format(path.join(cwd, config.build.src)), path.format(output)),
+		copy(
+			path.format(path.join(cwd, config.build.extensions)),
+			path.format(path.join(cwd, config.build.output, config.build.extensions))
+		)
+	)
 end
 
-local build = process.run({
-	"rojo",
-	"build",
-	if args:get("output") == "plugin" then "--plugin" else "--output",
-	"Rocket.rbxm",
-	"build.project.json",
-}, RUN_OPTIONS)
+local function prepareBuild()
+	prepareTooling()
+	return prepareOutput()
+end
 
-if sourcemap.ok and darklua.ok and darkluaExtensions.ok and build.ok then
+local function parseArgs(...: any)
+	local commandArgs = { ... }
+	table.remove(commandArgs, 1)
+	if #commandArgs == 0 or commandArgs[1] == "help" then
+		args:help()
+		return
+	end
+
+	args:parse(commandArgs)
+end
+
+parseArgs(...)
+do
+	local buildFiles = prepareBuild()
+
+	Summon.new("rojo", "sourcemap", "--output", config.sourcemap.filename, config.sourcemap.project):assert()
+	Summon.new("darklua", "process", config.build.src, config.build.output):assert()
+	Summon.new(
+		"darklua",
+		"process",
+		config.build.extensions,
+		path.format(path.join(config.build.output, config.build.extensions))
+	):assert()
+
+	local headerComment = createHeaderComment()
+	if next(headerComment) ~= nil then
+		local formattedHeaderComment = table.concat(headerComment, "\n")
+		for out in buildFiles do
+			fs.writestringtofile(out, formattedHeaderComment .. fs.readfiletostring(out))
+		end
+	end
+
+	Summon.new(
+		"rojo",
+		"build",
+		if args:get("output") == "plugin" then "--plugin" else "--output",
+		config.build.model,
+		config.build.project
+	):assert()
+
 	process.exit(0)
-	return
 end
-
-process.exit(1)

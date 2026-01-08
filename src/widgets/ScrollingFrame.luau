@@ -20,7 +20,9 @@ Internal.WidgetConstructor(
 			local frame = Instance.new("ScrollingFrame")
 			frame.Name = "Iris_ScrollingFrame"
 			frame.AutomaticSize = Enum.AutomaticSize.XY
-			frame.Size = UDim2.fromOffset(0, 0)
+			frame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			frame.CanvasSize = UDim2.new(0, 0)
+			frame.Size = UDim2.new(0, 0)
 			frame.BackgroundTransparency = 1
 			frame.BorderSizePixel = 0
 			frame.LayoutOrder = thisWidget.ZIndex

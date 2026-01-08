@@ -1,9 +1,8 @@
 {
     "languageMode": "strict",
     "aliases": {
-        "include": "include",
-        "vendor": "vendor",
         "src": "src",
+        "include": "include",
         "pkgs": "roblox_packages"
     },
     "lint": {

@@ -1,7 +1,7 @@
 local Charm = require("@pkgs/Charm")
 local Command = require("@src/core/Command")
 local Extension = require("@src/core/Extension")
-local fzy = require("@vendor/fzy")
+local fzy = require("@include/fzy")
 
 local LauncherStore = {}
 LauncherStore.isVisible = Charm.atom(false)

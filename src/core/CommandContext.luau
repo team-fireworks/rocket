@@ -4,7 +4,7 @@ local Selection = game:GetService("Selection")
 local Iris = require("@src/Iris")
 local Log = require("@src/utils/Log")
 local Trove = require("@pkgs/Trove")
-local fzy = require("@vendor/fzy")
+local fzy = require("@include/fzy")
 local types = require("@src/types")
 local widgets = require("@src/widgets")
 
@@ -62,7 +62,7 @@ function CommandContext.recordChanges(self: CommandContext, id: string?, title: 
 	local function finish()
 		if changeId then
 			ChangeHistoryService:FinishRecording(changeId, Enum.FinishRecordingOperation.Commit)
-			self.trove:Remove(finish)
+			changeId = nil
 		end
 	end
 

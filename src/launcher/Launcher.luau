@@ -2,7 +2,6 @@ local Command = require("@src/core/Command")
 local Iris = require("@src/Iris")
 local LauncherStore = require("./LauncherStore")
 local LauncherWindow = require("./LauncherWindow")
-local assets = require("@include/assets")
 local runCommand = require("@src/core/runCommand")
 local widgets = require("@src/widgets")
 

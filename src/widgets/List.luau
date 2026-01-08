@@ -8,7 +8,7 @@ local Flex = require("@src/widgets/styling/Flex")
 local Iris = require("@src/Iris")
 local Padding = require("@src/widgets/styling/Padding")
 local ScrollingFrame = require("./ScrollingFrame")
-local fzy = require("@vendor/fzy")
+local fzy = require("@include/fzy")
 local theme = require("@src/theme")
 
 export type ListProps<T> = {
@@ -105,7 +105,6 @@ local function List<T>(props: ListProps<T>)
 		newSelectedIndex = math.clamp(newSelectedIndex, 1, lenFiltered)
 	end
 
-	selectedIndex:set(newSelectedIndex)
 	if UserInputService:IsKeyDown(SELECT_KEYCODE) and not keysWereDown[SELECT_KEYCODE]:get() then
 		keysWereDown[SELECT_KEYCODE]:set(true)
 		if lenFiltered > 0 and props.onEntrySelected then
@@ -119,9 +118,14 @@ local function List<T>(props: ListProps<T>)
 
 	Iris.Separator()
 	Iris.PushConfig({ ItemSpacing = Vector2.new(Iris._config.ItemSpacing.X, 0) })
-	ScrollingFrame({ Size = UDim2.fromScale(1, 0), AutomaticSize = Enum.AutomaticSize.Y })
+	local scroller = ScrollingFrame({ Size = UDim2.fromScale(1, 0), AutomaticSize = Enum.AutomaticSize.Y })
+	local scrollingFrame = scroller.Instance :: ScrollingFrame
 	Flex({ Mode = Enum.UIFlexMode.Fill })
 	Padding({ X = UDim.new(0, Iris._config.CellPadding.X), Y = UDim.new(0, Iris._config.CellPadding.Y) })
+
+	if newSelectedIndex ~= selectedIndex:get() then
+		scrollingFrame.CanvasPosition = Vector2.new(0, 30 * newSelectedIndex) - scrollingFrame.AbsoluteSize
+	end
 	for i, entry in filtered do
 		local buttonConfig = if i == newSelectedIndex
 			then theme.PRESETS.BUTTONS.HIGHLIGHTED
@@ -144,6 +148,8 @@ local function List<T>(props: ListProps<T>)
 	end
 	Iris.End()
 	Iris.PopConfig()
+
+	selectedIndex:set(newSelectedIndex)
 end
 
 return List

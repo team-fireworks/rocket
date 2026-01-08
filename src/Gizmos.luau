@@ -1,7 +1,7 @@
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 
-local typeforge = require("@vendor/typeforge")
+local typeforge = require("@include/typeforge")
 
 export type Properties = {
 	Color3: Color3,

@@ -1,7 +1,7 @@
 local LocalizationService = game:GetService("LocalizationService")
 
 local Charm = require("@pkgs/Charm")
-local pp = require("@vendor/pp")
+local repr = require("@include/repr")
 
 export type LogEvent = {
 	timestamp: DateTime,
@@ -42,7 +42,7 @@ local function outputEvent(event: LogEvent)
 	local formatted = {}
 	for i = 1, event.args.n do
 		local value = event.args[i]
-		formatted[i] = if typeof(value) == "string" then value else pp(value)
+		formatted[i] = if typeof(value) == "string" then value else repr(value)
 	end
 
 	local formattedString = prefix .. string.gsub(table.concat(formatted, " "), "\n", `\n{prefix}`)

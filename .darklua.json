@@ -7,7 +7,6 @@
 				"sources": {
 					"@src": "./src",
 					"@include": "./include",
-					"@vendor": "./vendor",
 					"@pkgs": "./roblox_packages"
 				}
 			},
