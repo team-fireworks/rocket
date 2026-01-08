@@ -2,6 +2,7 @@ local CoreGui = game:GetService("CoreGui")
 
 local Charm = require("@pkgs/Charm")
 local CommandStore = require("@src/core/CommandStore")
+local Gizmos = require("@src/Gizmos")
 local Iris = require("@src/Iris")
 local Launcher = require("@src/launcher/Launcher")
 local LauncherStore = require("@src/launcher/LauncherStore")
@@ -31,10 +32,13 @@ local function initUi()
 		for _, command in CommandStore.commandsWithRenderResults() do
 			renderCommandResult(command, renderResults[command], contexts)
 		end
+
+		Gizmos.step()
 	end) :: any)
 
 	pluginTrove:Add(Iris.Shutdown :: any)
 	pluginTrove:Add(container)
+	pluginTrove:Add(Gizmos.destroyPool)
 end
 
 return initUi

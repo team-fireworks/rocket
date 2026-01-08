@@ -1,3 +1,4 @@
+local Command = require("@src/core/Command")
 local CommandStore = require("@src/core/CommandStore")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
@@ -23,6 +24,37 @@ ext:newCommand({
 			otherScope:cleanup()
 		end
 	end
+end)
+
+ext:newCommand({
+	id = "kill-commands",
+	title = "Kill Commands",
+	description = "Select and kill running commands.",
+}, function(ctx: Extension.CommandContext)
+	local commandResult = ctx:newResult()
+
+	local firstRun = true
+	commandResult.windowConfig = { WindowPadding = Vector2.zero, ItemSpacing = Vector2.zero }
+	function commandResult.renderWindow()
+		widgets.List({
+			captureFocus = firstRun,
+
+			entries = CommandStore.runningCommands(),
+			getEntryTitle = function(entry: Command.Command)
+				return entry.metadata.title
+			end,
+			renderEntry = function(entry: Command.Command)
+				Iris.Text({ entry.metadata.title })
+			end,
+			onEntrySelected = function(entry: Command.Command)
+				CommandStore.contexts()[entry]:cleanup()
+			end,
+		} :: widgets.ListProps<Command.Command>)
+
+		firstRun = false
+	end
+
+	return commandResult
 end)
 
 ext:newCommand({

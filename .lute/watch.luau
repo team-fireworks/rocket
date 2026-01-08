@@ -81,6 +81,7 @@ end
 
 function watchRocket()
 	watchRecursive(path.format(path.join(cwd, config.INPUT_DIR)))
+	watchRecursive(path.format(path.join(cwd, config.EXTENSIONS_DIR)))
 end
 
 watchRocket()

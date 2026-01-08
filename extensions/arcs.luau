@@ -11,93 +11,16 @@
     - Discord Username: selectgender
 ]]
 
--- TODO(znotfireman): reimplement gizmos then port to refactor
 -- TODO(znotfireman): more expressive authors
 
-local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local UserInputService = game:GetService("UserInputService")
 
 local Extension = require("@src/core/Extension")
+local Gizmos = require("@src/Gizmos")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
--- local Gizmos = require("@src/Gizmos")
 
-local function BoundingBoxGizmo(_cframe: CFrame, _size: Vector3)
-	-- local topFrontRightCorner = cframe * Vector3.new(size.X / 2, size.Y / 2, -size.Z / 2)
-	-- local topFrontLeftCorner = cframe * Vector3.new(-size.X / 2, size.Y / 2, -size.Z / 2)
-	-- local topBackLeftCorner = cframe * Vector3.new(-size.X / 2, size.Y / 2, size.Z / 2)
-	-- local topBackRightCorner = cframe * Vector3.new(size.X / 2, size.Y / 2, size.Z / 2)
-	-- local bottomFrontRightCorner = cframe * Vector3.new(size.X / 2, -size.Y / 2, -size.Z / 2)
-	-- local bottomFrontLeftCorner = cframe * Vector3.new(-size.X / 2, -size.Y / 2, -size.Z / 2)
-	-- local bottomBackLeftCorner = cframe * Vector3.new(-size.X / 2, -size.Y / 2, size.Z / 2)
-	-- local bottomBackRightCorner = cframe * Vector3.new(size.X / 2, -size.Y / 2, size.Z / 2)
-
-	-- -- Top surface
-	-- Gizmos.drawLine(topFrontRightCorner, topFrontLeftCorner)
-	-- Gizmos.drawLine(topFrontLeftCorner, topBackLeftCorner)
-	-- Gizmos.drawLine(topBackLeftCorner, topBackRightCorner)
-	-- Gizmos.drawLine(topBackRightCorner, topFrontRightCorner)
-
-	-- -- Side edges
-	-- Gizmos.drawLine(topFrontRightCorner, bottomFrontRightCorner)
-	-- Gizmos.drawLine(topFrontLeftCorner, bottomFrontLeftCorner)
-	-- Gizmos.drawLine(topBackLeftCorner, bottomBackLeftCorner)
-	-- Gizmos.drawLine(topBackRightCorner, bottomBackRightCorner)
-
-	-- -- Buttom surface
-	-- Gizmos.drawLine(bottomFrontRightCorner, bottomFrontLeftCorner)
-	-- Gizmos.drawLine(bottomFrontLeftCorner, bottomBackLeftCorner)
-	-- Gizmos.drawLine(bottomBackLeftCorner, bottomBackRightCorner)
-	-- Gizmos.drawLine(bottomBackRightCorner, bottomFrontRightCorner)
-end
-
-local function SurfaceSelectionGizmo(_part: BasePart, _surface: Enum.NormalId)
-	-- local cframe = part.CFrame
-	-- local size = part.Size
-
-	-- local topFrontRightCorner = cframe * Vector3.new(size.X / 2, size.Y / 2, -size.Z / 2)
-	-- local topFrontLeftCorner = cframe * Vector3.new(-size.X / 2, size.Y / 2, -size.Z / 2)
-	-- local topBackLeftCorner = cframe * Vector3.new(-size.X / 2, size.Y / 2, size.Z / 2)
-	-- local topBackRightCorner = cframe * Vector3.new(size.X / 2, size.Y / 2, size.Z / 2)
-	-- local bottomFrontRightCorner = cframe * Vector3.new(size.X / 2, -size.Y / 2, -size.Z / 2)
-	-- local bottomFrontLeftCorner = cframe * Vector3.new(-size.X / 2, -size.Y / 2, -size.Z / 2)
-	-- local bottomBackLeftCorner = cframe * Vector3.new(-size.X / 2, -size.Y / 2, size.Z / 2)
-	-- local bottomBackRightCorner = cframe * Vector3.new(size.X / 2, -size.Y / 2, size.Z / 2)
-
-	-- if surface == Enum.NormalId.Top then
-	-- 	Gizmos.drawLine(topFrontRightCorner, topFrontLeftCorner)
-	-- 	Gizmos.drawLine(topFrontLeftCorner, topBackLeftCorner)
-	-- 	Gizmos.drawLine(topBackLeftCorner, topBackRightCorner)
-	-- 	Gizmos.drawLine(topBackRightCorner, topFrontRightCorner)
-	-- elseif surface == Enum.NormalId.Bottom then
-	-- 	Gizmos.drawLine(bottomFrontRightCorner, bottomFrontLeftCorner)
-	-- 	Gizmos.drawLine(bottomFrontLeftCorner, bottomBackLeftCorner)
-	-- 	Gizmos.drawLine(bottomBackLeftCorner, bottomBackRightCorner)
-	-- 	Gizmos.drawLine(bottomBackRightCorner, bottomFrontRightCorner)
-	-- elseif surface == Enum.NormalId.Left then
-	-- 	Gizmos.drawLine(topFrontLeftCorner, topBackLeftCorner)
-	-- 	Gizmos.drawLine(topBackLeftCorner, bottomBackLeftCorner)
-	-- 	Gizmos.drawLine(bottomBackLeftCorner, bottomFrontLeftCorner)
-	-- 	Gizmos.drawLine(bottomFrontLeftCorner, topFrontLeftCorner)
-	-- elseif surface == Enum.NormalId.Right then
-	-- 	Gizmos.drawLine(topFrontRightCorner, topBackRightCorner)
-	-- 	Gizmos.drawLine(topBackRightCorner, bottomBackRightCorner)
-	-- 	Gizmos.drawLine(bottomBackRightCorner, bottomFrontRightCorner)
-	-- 	Gizmos.drawLine(bottomFrontRightCorner, topFrontRightCorner)
-	-- elseif surface == Enum.NormalId.Front then
-	-- 	Gizmos.drawLine(topFrontLeftCorner, topFrontRightCorner)
-	-- 	Gizmos.drawLine(topFrontRightCorner, bottomFrontRightCorner)
-	-- 	Gizmos.drawLine(bottomFrontRightCorner, bottomFrontLeftCorner)
-	-- 	Gizmos.drawLine(bottomFrontLeftCorner, topFrontLeftCorner)
-	-- elseif surface == Enum.NormalId.Back then
-	-- 	Gizmos.drawLine(topBackLeftCorner, topBackRightCorner)
-	-- 	Gizmos.drawLine(topBackRightCorner, bottomBackRightCorner)
-	-- 	Gizmos.drawLine(bottomBackRightCorner, bottomBackLeftCorner)
-	-- 	Gizmos.drawLine(bottomBackLeftCorner, topBackLeftCorner)
-	-- end
-end
-
--- fattest function ive ever made. im not sure of a way to simplify all the if statements... so if youre reading this right now try to take a crack at the problem and maybe write up a quick pull request!
+-- TODO: this is performant but can this be simplified?
 local function getNextArcCFrame(
 	angle: number,
 	rotationType: string,
@@ -240,7 +163,7 @@ ext:newCommand({
 		local selectedFaceState = Iris.State(Enum.NormalId.Front)
 
 		if not mouseIsInWindow and mouse.Target and mouse.TargetSurface then
-			SurfaceSelectionGizmo(mouse.Target, mouse.TargetSurface)
+			Gizmos.drawSurface(mouse.TargetSurface, mouse.Target.CFrame, mouse.Target.Size)
 
 			if mouseDown then
 				selectedFaceState:set(mouse.TargetSurface)
@@ -275,13 +198,13 @@ ext:newCommand({
 		for _, instance in selections do
 			if instance:IsA("BasePart") then
 				local size = instance.Size
-				BoundingBoxGizmo(
+				Gizmos.drawBoundingBox(
 					getNextArcCFrame(angleRadians, rotationType, selectedFace, instance.CFrame, size),
 					size
 				)
 			elseif instance:IsA("Model") then
 				local size = instance:GetExtentsSize()
-				BoundingBoxGizmo(
+				Gizmos.drawBoundingBox(
 					getNextArcCFrame(angleRadians, rotationType, selectedFace, instance:GetPivot(), size),
 					size
 				)

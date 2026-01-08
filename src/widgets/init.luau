@@ -1,3 +1,7 @@
+local List = require("@self/List")
+
+export type ListProps<T> = List.ListProps<T>
+
 local widgets = table.freeze {
 	ButtonGroup = require("@self/ButtonGroup"),
 	InstantInputText = require("@self/InstantInputText"),
@@ -11,7 +15,7 @@ local widgets = table.freeze {
 
 	Subtext = require("@self/typography/Subtext"),
 
-	List = require("@self/List"),
+	List = List,
 }
 
 return widgets

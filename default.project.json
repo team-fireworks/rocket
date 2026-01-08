@@ -4,6 +4,9 @@
 		"$className": "Actor",
 		"Rocket": {
 			"$path": "src",
+			"extensions": {
+				"$path": "extensions"
+			},
 			"include": {
 				"$path": "include",
 				"packages": {

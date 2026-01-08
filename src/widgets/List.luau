@@ -67,10 +67,11 @@ local function List<T>(props: ListProps<T>)
 		props.onSearchChange(search)
 	end
 
-	local filterEntries = props.filterEntries or defaultFilterEntries
-	local filtered = filterEntries(search, props)
-	local lenFiltered = #filtered
+	local filtered = if search == ""
+		then props.entries
+		else (props.filterEntries or defaultFilterEntries)(search, props)
 
+	local lenFiltered = #filtered
 	local selectedIndex = Iris.State(1)
 
 	-- TODO: useKeysDown hook
@@ -91,12 +92,12 @@ local function List<T>(props: ListProps<T>)
 	if lenFiltered == 0 then
 		newSelectedIndex = 1
 	else
-		if keysAreDown[PREVIOUS_KEYCODE] and not keysWereDown[PREVIOUS_KEYCODE]:get() then
+		if UserInputService:IsKeyDown(PREVIOUS_KEYCODE) and keysWereDown[PREVIOUS_KEYCODE]:get() then
 			keysWereDown[PREVIOUS_KEYCODE]:set(true)
 			newSelectedIndex -= 1
 		end
 
-		if keysAreDown[NEXT_KEYCODE] and not not keysWereDown[NEXT_KEYCODE]:get() then
+		if UserInputService:IsKeyDown(NEXT_KEYCODE) and keysWereDown[NEXT_KEYCODE]:get() then
 			keysWereDown[NEXT_KEYCODE]:set(true)
 			newSelectedIndex += 1
 		end

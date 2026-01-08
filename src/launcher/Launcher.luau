@@ -1,9 +1,9 @@
+local Command = require("@src/core/Command")
 local Iris = require("@src/Iris")
-local LauncherCommand = require("./LauncherCommand")
-local LauncherSearch = require("./LauncherSearch")
 local LauncherStore = require("./LauncherStore")
 local LauncherWindow = require("./LauncherWindow")
-local theme = require("@src/theme")
+local assets = require("@include/assets")
+local runCommand = require("@src/core/runCommand")
 local widgets = require("@src/widgets")
 
 local function Launcher()
@@ -12,37 +12,37 @@ local function Launcher()
 		ContentWidth = UDim.new(1, 0),
 		ItemSpacing = Vector2.new(8, 0),
 	}
+
 	local window = LauncherWindow()
-	do
-		if window.closed() then
-			LauncherStore.isVisible(false)
-			LauncherStore.isFocused(false)
-			Iris.End()
-			Iris.PopConfig()
-			return
-		end
-
-		LauncherSearch()
-		Iris.Separator()
-
-		widgets.ScrollingFrame { Size = UDim2.fromScale(1, 0), AutomaticSize = Enum.AutomaticSize.None }
-		do
-			widgets.Flex { Mode = Enum.UIFlexMode.Fill }
-			widgets.Padding { X = UDim.new(0, Iris._config.CellPadding.X), Y = UDim.new(0, Iris._config.CellPadding.Y) }
-
-			local selectedIndex = LauncherStore.selectedIndex()
-			for i, command in LauncherStore.searchResults() do
-				Iris.PushConfig(
-					if selectedIndex == i
-						then theme.PRESETS.BUTTONS.HIGHLIGHTED
-						else theme.PRESETS.BUTTONS.UNHIGHLIGHTED
-				)
-				LauncherCommand(command)
-				Iris.PopConfig()
-			end
-		end
+	if window.closed() then
+		LauncherStore.isVisible(false)
 		Iris.End()
+		Iris.PopConfig()
+		return
 	end
+
+	widgets.List({
+		onSearchChange = LauncherStore.search,
+		captureFocus = LauncherStore.isFocused(),
+		entries = LauncherStore.searchResults(),
+		getEntryTitle = function(command: Command.Command)
+			return command.metadata.title
+		end,
+		renderEntry = function(command: Command.Command)
+			Iris.Image({ command.metadata.icon or command.extension.metadata.icon, UDim2.fromOffset(18, 18) })
+			Iris.Text({ command.metadata.title })
+			widgets.Subtext({ command.extension.metadata.title })
+			widgets.FlexFiller({ Mode = Enum.UIFlexMode.Fill })
+			widgets.Subtext({ "Command" })
+		end,
+		onEntrySelected = function(command: Command.Command)
+			LauncherStore.isVisible(false)
+			task.defer(runCommand, command)
+		end,
+	} :: widgets.ListProps<Command.Command>)
+
+	LauncherStore.isFocused(true)
+
 	Iris.End()
 	Iris.PopConfig()
 end

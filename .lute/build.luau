@@ -97,6 +97,13 @@ local darklua = process.run({
 	config.OUTPUT_DIR,
 }, RUN_OPTIONS)
 
+local darkluaExtensions = process.run({
+	"darklua",
+	"process",
+	config.EXTENSIONS_DIR,
+	path.format(path.join(config.OUTPUT_DIR, config.EXTENSIONS_DIR)),
+}, RUN_OPTIONS)
+
 if shouldAddHeaderComment then
 	for out in outputPaths do
 		fs.writestringtofile(out, headerCommentFormatted .. fs.readfiletostring(out))
@@ -117,7 +124,7 @@ local build = process.run({
 	"build.project.json",
 }, RUN_OPTIONS)
 
-if sourcemap.ok and darklua.ok and build.ok then
+if sourcemap.ok and darklua.ok and darkluaExtensions.ok and build.ok then
 	process.exit(0)
 	return
 end
