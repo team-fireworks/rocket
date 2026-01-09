@@ -1,5 +1,5 @@
 local Summon = require("./lib/Summon")
-local config = require("@lib/config")
+local config = require("@lib/config")()
 local fs = require("@std/fs")
 local net = require("@lute/net")
 local process = require("@lute/process")

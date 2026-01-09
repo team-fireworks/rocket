@@ -1,4 +1,4 @@
-local config = require("@lib/config")
+local config = require("@lib/config")()
 local fs = require("@std/fs")
 local path = require("@std/path")
 local process = require("@lute/process")

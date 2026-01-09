@@ -3,12 +3,13 @@ local Workspace = game:GetService("Workspace")
 local Iris = require("@src/Iris")
 local prefixId = require("@src/utils/prefixId")
 
+local WINDOW_SIZE = Vector2.new(640, 284)
+
 local function LauncherWindow()
 	Iris.SetNextWidgetID(prefixId "launcherWidget")
 
 	local viewportSize = Workspace.CurrentCamera.ViewportSize
-	local windowSize = viewportSize / 2
-	local windowPositionState, windowSizeState = Iris.State(windowSize / 2), Iris.State(windowSize)
+	local windowPosition = Iris.State(Vector2.zero)
 
 	local window = Iris.Window({
 		"Rocket Launcher",
@@ -19,10 +20,9 @@ local function LauncherWindow()
 		[Iris.Args.Window.NoResize] = true,
 		[Iris.Args.Window.NoNav] = true,
 		[Iris.Args.Window.NoMenu] = true,
-	}, { position = windowPositionState, size = windowSizeState })
+	}, { position = windowPosition, size = WINDOW_SIZE :: any })
 
-	windowPositionState:set(windowSize / 2)
-	windowSizeState:set(windowSize)
+	windowPosition:set(viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100))
 
 	return window
 end

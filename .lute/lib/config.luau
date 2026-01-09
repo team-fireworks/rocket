@@ -24,10 +24,14 @@ export type Config = {
 	},
 }
 
-local CONFIG_PATH = path.join(process.cwd(), "rocket.config.toml")
-if fs.exists(CONFIG_PATH) then
-	local config: Config = toml.deserialize(fs.readfiletostring(CONFIG_PATH)) :: any
-	return config
+local function config()
+	local CONFIG_PATH = path.join(process.cwd(), "rocket.config.toml")
+	if fs.exists(CONFIG_PATH) then
+		local deserialized: Config = toml.deserialize(fs.readfiletostring(CONFIG_PATH)) :: any
+		return deserialized
+	end
+	print("Missing `rocket.config.toml` configuration!")
+	return process.exit(1)
 end
-print("Missing `rocket.config.toml` configuration!")
-return process.exit(1)
+
+return config

@@ -1,4 +1,4 @@
-local config = require("../rocket.config")
+local config = require("@lib/config")()
 local fs = require("@lute/fs")
 local path = require("@std/path")
 local process = require("@lute/process")
@@ -82,8 +82,8 @@ local function watchRecursive(dir: string)
 end
 
 function watchRocket()
-	watchRecursive(path.format(path.join(cwd, config.INPUT_DIR)))
-	watchRecursive(path.format(path.join(cwd, config.EXTENSIONS_DIR)))
+	watchRecursive(path.format(path.join(cwd, config.build.src)))
+	watchRecursive(path.format(path.join(cwd, config.build.extensions)))
 end
 
 do

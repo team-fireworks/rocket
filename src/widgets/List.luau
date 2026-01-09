@@ -87,7 +87,8 @@ local function List<T>(props: ListProps<T>)
 		[SELECT_KEYCODE] = Iris.State(keysAreDown[SELECT_KEYCODE]),
 	}
 
-	local newSelectedIndex = selectedIndex:get()
+	local oldSelectedIndex = selectedIndex:get()
+	local newSelectedIndex = oldSelectedIndex
 
 	if lenFiltered == 0 then
 		newSelectedIndex = 1
@@ -119,21 +120,24 @@ local function List<T>(props: ListProps<T>)
 	Iris.Separator()
 	Iris.PushConfig({ ItemSpacing = Vector2.new(Iris._config.ItemSpacing.X, 0) })
 	local scroller = ScrollingFrame({ Size = UDim2.fromScale(1, 0), AutomaticSize = Enum.AutomaticSize.Y })
-	local scrollingFrame = scroller.Instance :: ScrollingFrame
+	local selectedPosition, selectedSize = Vector2.zero, Vector2.zero
 	Flex({ Mode = Enum.UIFlexMode.Fill })
 	Padding({ X = UDim.new(0, Iris._config.CellPadding.X), Y = UDim.new(0, Iris._config.CellPadding.Y) })
-
-	if newSelectedIndex ~= selectedIndex:get() then
-		scrollingFrame.CanvasPosition = Vector2.new(0, 30 * newSelectedIndex) - scrollingFrame.AbsoluteSize
-	end
 	for i, entry in filtered do
-		local buttonConfig = if i == newSelectedIndex
+		local isSelected = i == newSelectedIndex
+		local buttonConfig = if isSelected
 			then theme.PRESETS.BUTTONS.HIGHLIGHTED
 			else theme.PRESETS.BUTTONS.UNHIGHLIGHTED
 
 		Iris.PushConfig(buttonConfig)
 		local button = ButtonGroup({ Size = UDim2.fromScale(1, 0) })
-		button.Instance.LayoutOrder = i + 100
+		local buttonInstance = button.Instance
+		buttonInstance.LayoutOrder = i + 100
+		if isSelected then
+			selectedPosition = buttonInstance.AbsolutePosition
+			selectedSize = buttonInstance.AbsoluteSize
+		end
+
 		props.renderEntry(entry, props)
 		Iris.End()
 		Iris.PopConfig()
@@ -148,6 +152,28 @@ local function List<T>(props: ListProps<T>)
 	end
 	Iris.End()
 	Iris.PopConfig()
+
+	-- TODO: scrolling down is a bit janky
+	local sign = math.sign(newSelectedIndex - oldSelectedIndex)
+	if sign ~= 0 then
+		local scrollingFrame = scroller.Instance :: ScrollingFrame
+
+		local canvasPosition = scrollingFrame.CanvasPosition
+		local frameTop = scrollingFrame.AbsolutePosition.Y + Iris._config.FramePadding.Y
+		local frameBottom = frameTop + scrollingFrame.AbsoluteWindowSize.Y + Iris._config.FramePadding.Y
+
+		local itemTop = selectedPosition.Y
+		local itemBottom = itemTop + selectedSize.Y
+
+		if itemTop < frameTop then
+			scrollingFrame.CanvasPosition = Vector2.new(canvasPosition.X, canvasPosition.Y - (frameTop - itemTop))
+		end
+
+		if itemBottom > frameBottom then
+			scrollingFrame.CanvasPosition =
+				Vector2.new(canvasPosition.X, canvasPosition.Y + (itemBottom - frameBottom) + selectedSize.Y)
+		end
+	end
 
 	selectedIndex:set(newSelectedIndex)
 end
