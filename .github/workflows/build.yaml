@@ -22,7 +22,7 @@ jobs:
             - name: Install dependencies
               run: pesde install
             - name: Build Rocket
-              run: lune run build model
+              run: lute run build model
             - uses: actions/upload-artifact@v4
               with:
                   name: Plugin

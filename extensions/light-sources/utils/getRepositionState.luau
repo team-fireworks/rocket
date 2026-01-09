@@ -5,12 +5,14 @@ local Extension = require("@src/core/Extension")
 local types = require("../types")
 
 local function useRepositionState(ctx: Extension.CommandContext): types.RepositionState
+	local mouse = ctx:getMouse()
 	return {
 		clockTime = Lighting.ClockTime,
 		geographicLatitude = Lighting.GeographicLatitude,
 		sunDirection = Lighting:GetSunDirection(),
 		cameraTransform = Workspace.CurrentCamera.CFrame,
-		mouseTransform = ctx:getMouse().Hit,
+		mouseTransform = mouse.Hit,
+		mouseRay = mouse.UnitRay,
 	}
 end
 

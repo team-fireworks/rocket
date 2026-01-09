@@ -1,21 +1,37 @@
-local List = require("@self/List")
+local ButtonGroup = require("@self/interactions/ButtonGroup")
+local InstantInputText = require("@self/interactions/InstantInputText")
 
+local Frame = require("@self/layouts/Frame")
+local List = require("@self/layouts/List")
+local ScrollingFrame = require("@self/layouts/ScrollingFrame")
+
+local AspectRatio = require("@self/styles/AspectRatio")
+local Flex = require("@self/styles/Flex")
+local FlexSpacer = require("@self/styles/FlexSpacer")
+local Padding = require("@self/styles/Padding")
+local Spacer = require("@self/styles/Spacer")
+
+export type ButtonGroupProps = ButtonGroup.ButtonGroupProps
+export type InstantInputTextProps = InstantInputText.InstantInputTextProps
+
+export type FrameProps = Frame.FrameProps
 export type ListProps<T> = List.ListProps<T>
+export type ScrollingFrameProps = ScrollingFrame.ScrollingFrameProps
 
-local widgets = table.freeze {
-	ButtonGroup = require("@self/ButtonGroup"),
-	InstantInputText = require("@self/InstantInputText"),
-	Frame = require("@self/Frame"),
-	ScrollingFrame = require("@self/ScrollingFrame"),
+export type PaddingProps = Padding.PaddingProps
+export type SpacerProps = Spacer.SpacerProps
 
-	Flex = require("@self/styling/Flex"),
-	FlexFiller = require("@self/styling/FlexFiller"),
-	Padding = require("@self/styling/Padding"),
-	Spacer = require("@self/styling/Spacer"),
+return table.freeze({
+	ButtonGroup = ButtonGroup,
+	InstantInputText = InstantInputText,
 
-	Subtext = require("@self/typography/Subtext"),
-
+	Frame = Frame,
 	List = List,
-}
+	ScrollingFrame = ScrollingFrame,
 
-return widgets
+	AspectRatio = AspectRatio,
+	Flex = Flex,
+	FlexSpacer = FlexSpacer,
+	Padding = Padding,
+	Spacer = Spacer,
+})

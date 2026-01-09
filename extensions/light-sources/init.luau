@@ -2,6 +2,7 @@ local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 
 local Extension = require("@src/core/Extension")
+local Iris = require("@src/Iris")
 local assets = require("@include/assets")
 local getRepositionState = require("@self/utils/getRepositionState")
 local repositions = require("@self/repositions")
@@ -25,6 +26,7 @@ for _, source in sources do
 			description = `Repositions the {source.name} by {reposition.describedBy}.`,
 		}, function(ctx: Extension.CommandContext)
 			ctx:recordChanges()
+			local initial: types.RepositionState = nil :: any
 			local hasInitiallyClicked = false
 
 			local commandResult = ctx:newResult()
@@ -34,20 +36,18 @@ for _, source in sources do
 					return
 				end
 
-				local initial: types.RepositionState
 				local isMouseDown = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
 				if hasInitiallyClicked then
 					if not isMouseDown then
 						initial = nil :: any
 						hasInitiallyClicked = false
-						ctx.trove:Clean()
+						ctx:cleanup()
 						return
 					end
 
 					local now = getRepositionState(ctx)
 					initial = initial or now
-
-					local direction = reposition.updateDirection(initial, now, true)
+					local direction = reposition.updateDirection(initial, getRepositionState(ctx), true)
 					if direction then
 						source.updateDirection(direction)
 					else
@@ -64,5 +64,25 @@ for _, source in sources do
 		end)
 	end
 end
+
+ext:newCommand({
+	id = "reposition",
+	title = "Reposition Light Sources",
+	description = "Summons a toolbar to visually drag and adjust the sun, the moon, and light instances.",
+}, function(ctx: Extension.CommandContext)
+	local result = ctx:newResult()
+
+	function result.renderViewport()
+		if Iris.Window({ "Reposition Light Sources" }).closed() then
+			ctx:cleanup()
+			Iris.End()
+			return
+		end
+
+		Iris.End()
+	end
+
+	return result
+end)
 
 return ext

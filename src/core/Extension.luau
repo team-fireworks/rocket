@@ -1,37 +1,24 @@
 local Charm = require("@pkgs/Charm")
-local Command = require("@src/core/Command")
-local CommandContext = require("@src/core/CommandContext")
-local Log = require("@src/utils/Log")
+local Command = require("@src/core/commands/Command")
+local CommandRuntime = require("@src/core/commands/CommandRuntime")
+local atoms = require("@src/utils/atoms")
+local createCommand = require("@src/core/constructors/createCommand")
 local types = require("@src/types")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin")
 
-export type CommandResult = types.CommandResult
-export type CommandContext = CommandContext.CommandContext
-
-local log = Log.new(script)
+export type CommandOutput = types.CommandOutput
+export type CommandRuntime = CommandRuntime.CommandRuntime
 
 local Extension = {}
 Extension.__index = Extension
 
 export type Extension = setmetatable<{
-	read _plugin: Plugin,
-	read commands: { Command.Command },
-	read metadata: types.ExtensionMetadata,
+	_plugin: Plugin,
+	_commands: { Command.Command },
+	_unloadingConnection: RBXScriptConnection,
+	interface: types.ExtensionInterface,
 }, typeof(Extension)>
-
--- TODO: flow to validate third party plugins
-function Extension.new(extPlugin: Plugin, extMetadata: types.ExtensionMetadata): Extension
-	if Extension._extensionsById()[extMetadata.id] then
-		error(`Extension conflicts with id: {extMetadata.id}`)
-	end
-	local self = setmetatable({ _plugin = extPlugin, metadata = extMetadata, commands = {} }, Extension)
-	local allExtensions = table.clone(Extension._allExtensions())
-	allExtensions[self] = true
-	Extension._allExtensions(allExtensions)
-	log:trace("Registered new extension:", extMetadata.id)
-	return table.freeze(self)
-end
 
 function Extension.is(x: unknown)
 	return typeof(x) == "table" and getmetatable(x) == Extension
@@ -41,28 +28,33 @@ function Extension.isCore(self: Extension)
 	return self._plugin == plugin
 end
 
-function Extension.newCommand(
-	self: Extension,
-	commandMetadata: types.CommandMetadata,
-	commandRunner: Command.CommandRunner
-)
-	local command = Command.new(self, commandMetadata, commandRunner)
-	log:trace("Extension", self.metadata.id, "registered new command", commandMetadata.id)
-	table.insert(self.commands, command)
+function Extension.pushCommand(self: Extension, command: Command.Command)
+	if command:isHeadless() then
+		command._extension = self :: any
+		table.insert(self._commands, command)
+		return
+	end
+
+	error(`command "{command.interface.id}" is already bounded to the extension "{command._extension.interface.id}".`)
+end
+
+function Extension.newCommand(self: Extension, interface: types.CommandInterface, runner: Command.CommandRunner)
+	self:pushCommand(createCommand(interface, runner))
 end
 
 function Extension.destroy(self: Extension)
-	local allExtensions = table.clone(Extension._allExtensions())
-	allExtensions[self] = nil
-	Extension._allExtensions(allExtensions)
+	if self._unloadingConnection and self._unloadingConnection.Connected then
+		self._unloadingConnection:Disconnect()
+	end
+	atoms.set(Extension._allExtensions :: any, self, nil)
 end
 
 function Extension.compareByTitle(lhs: Extension, rhs: Extension): boolean
-	return lhs.metadata.title < rhs.metadata.title
+	return lhs.interface.title < rhs.interface.title
 end
 
 function Extension.__tostring(self: Extension)
-	return `Extension({string.format("%q", self.metadata.id)})`
+	return `Extension({string.format("%q", self.interface.id)})`
 end
 
 Extension._allExtensions = Charm.atom({} :: { [Extension]: true })
@@ -80,7 +72,7 @@ Extension._extensionTitles = Charm.computed(function(): { string }
 	local allExtensions = Extension._extensionsSortedByTitle()
 	local result = table.create(#allExtensions) :: { string }
 	for _, ext in allExtensions do
-		table.insert(result, ext.metadata.title)
+		table.insert(result, ext.interface.title)
 	end
 	table.sort(result)
 	return result
@@ -89,7 +81,7 @@ end)
 Extension._extensionsById = Charm.computed(function(): { [string]: Extension }
 	local result = {}
 	for extension in Extension._allExtensions() do
-		result[extension.metadata.id] = extension
+		result[extension.interface.id] = extension
 	end
 	return result
 end)
@@ -97,7 +89,7 @@ end)
 Extension._allCommands = Charm.computed(function(): { Command.Command }
 	local result = {}
 	for extension in Extension._allExtensions() do
-		table.move(extension.commands, 1, #extension.commands, #result + 1, result)
+		table.move(extension._commands, 1, #extension._commands, #result + 1, result)
 	end
 	table.sort(result, Command.compareTitles)
 	return result
@@ -116,7 +108,7 @@ Extension._commandTitles = Charm.computed(function(): { string }
 	local allCommands = Extension._allCommands()
 	local result = table.create(#allCommands) :: { string }
 	for i, cmd in allCommands do
-		result[i] = cmd.metadata.title
+		result[i] = cmd.interface.title
 	end
 	return result
 end)
