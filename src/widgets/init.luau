@@ -11,6 +11,8 @@ local FlexSpacer = require("@self/styles/FlexSpacer")
 local Padding = require("@self/styles/Padding")
 local Spacer = require("@self/styles/Spacer")
 
+local Subtext = require("@self/typography/Subtext")
+
 export type ButtonGroupProps = ButtonGroup.ButtonGroupProps
 export type InstantInputTextProps = InstantInputText.InstantInputTextProps
 
@@ -34,4 +36,6 @@ return table.freeze({
 	FlexSpacer = FlexSpacer,
 	Padding = Padding,
 	Spacer = Spacer,
+
+	Subtext = Subtext,
 })

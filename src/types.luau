@@ -71,9 +71,9 @@ local CommandInterface = Boba.Struct {
 
 local CommandOutput = Boba.Struct {
 	renderViewport = Boba.Function:Optional():Nickname("() -> ()?").inner :: () -> ()?,
-	renderLauncher = Boba.Function:Optional():Nickname("() -> ()?").inner :: () -> ()?,
 
-	-- temp
+	windowArgs = Boba.Unknown:Array():Optional().inner,
+	windowConfig = Boba.String:Map(Boba.Any):Optional().inner,
 	renderWindow = Boba.Function:Optional():Nickname("(Iris.Window) -> ()?").inner :: (window: Iris.Window) -> ()?,
 }:Nickname("CommandResult")
 
