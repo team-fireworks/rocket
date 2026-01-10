@@ -1,8 +1,8 @@
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
-local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
-local ext = Extension.new(plugin, {
+local ext = createCoreExtension({
 	id = "rocket-color-picker",
 	title = "Color Picker",
 	description = "TBA",
@@ -14,28 +14,28 @@ ext:newCommand({
 	id = "pick-from-part",
 	title = "Pick Color from Part",
 	description = "TODO",
-}, function()
-	local commandResult: Extension.CommandResult = {}
+}, function(r: Extension.CommandRuntime)
+	local output = r:createCommandOutput()
 
-	function commandResult.renderViewport() end
+	function output.renderViewport() end
 
-	function commandResult.renderWindow() end
+	function output.renderWindow() end
 
-	return commandResult
+	return output
 end)
 
 ext:newCommand({
 	id = "wheel",
 	title = "Color Wheel",
 	description = "TODO",
-}, function()
-	local commandResult: Extension.CommandResult = {}
+}, function(r: Extension.CommandRuntime)
+	local output = r:createCommandOutput()
+	--
+	function output.renderViewport() end
 
-	function commandResult.renderViewport() end
+	function output.renderWindow() end
 
-	function commandResult.renderWindow() end
-
-	return commandResult
+	return output
 end)
 
 return ext

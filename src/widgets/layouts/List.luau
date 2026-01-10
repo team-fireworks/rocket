@@ -1,14 +1,13 @@
 -- TODO: virtual lists
 -- TODO: pagination
 
-local UserInputService = game:GetService("UserInputService")
-
 local ButtonGroup = require("../interactions/ButtonGroup")
-local Flex = require("@src/widgets/styles/Flex")
+local Flex = require("../styles/Flex")
 local Iris = require("@src/Iris")
-local Padding = require("@src/widgets/styles/Padding")
+local Padding = require("../styles/Padding")
 local ScrollingFrame = require("./ScrollingFrame")
 local fzy = require("@include/fzy")
+local useKeys = require("@src/core/hooks/useKeys")
 -- local theme = require("@src/theme")
 
 export type ListProps<T> = {
@@ -79,47 +78,27 @@ local function List<T>(props: ListProps<T>)
 	local lenFiltered = #filtered
 	local selectedIndex = Iris.State(1)
 
-	-- TODO: useKeysDown hook
-	local keysAreDown: { [Enum.KeyCode]: boolean } = {
-		[PREVIOUS_KEYCODE] = UserInputService:IsKeyDown(PREVIOUS_KEYCODE),
-		[NEXT_KEYCODE] = UserInputService:IsKeyDown(NEXT_KEYCODE),
-		[SELECT_KEYCODE] = UserInputService:IsKeyDown(SELECT_KEYCODE),
-	}
-
-	local keysWereDown: { [Enum.KeyCode]: Iris.State<boolean> } = {
-		[PREVIOUS_KEYCODE] = Iris.State(keysAreDown[PREVIOUS_KEYCODE]),
-		[NEXT_KEYCODE] = Iris.State(keysAreDown[NEXT_KEYCODE]),
-		[SELECT_KEYCODE] = Iris.State(keysAreDown[SELECT_KEYCODE]),
-	}
-
 	local oldSelectedIndex = selectedIndex:get()
 	local newSelectedIndex = oldSelectedIndex
 
 	if lenFiltered == 0 then
 		newSelectedIndex = 1
 	else
-		if UserInputService:IsKeyDown(PREVIOUS_KEYCODE) and keysWereDown[PREVIOUS_KEYCODE]:get() then
-			keysWereDown[PREVIOUS_KEYCODE]:set(true)
+		if useKeys.andConsumePress(PREVIOUS_KEYCODE) then
 			newSelectedIndex -= 1
 		end
 
-		if UserInputService:IsKeyDown(NEXT_KEYCODE) and keysWereDown[NEXT_KEYCODE]:get() then
-			keysWereDown[NEXT_KEYCODE]:set(true)
+		if useKeys.andConsumePress(NEXT_KEYCODE) then
 			newSelectedIndex += 1
 		end
 
 		newSelectedIndex = math.clamp(newSelectedIndex, 1, lenFiltered)
-	end
 
-	if UserInputService:IsKeyDown(SELECT_KEYCODE) and not keysWereDown[SELECT_KEYCODE]:get() then
-		keysWereDown[SELECT_KEYCODE]:set(true)
-		if lenFiltered > 0 and props.onEntrySelected then
-			props.onEntrySelected(filtered[newSelectedIndex] or filtered[lenFiltered])
+		if useKeys.andConsumePress(SELECT_KEYCODE) then
+			if lenFiltered > 0 and props.onEntrySelected then
+				props.onEntrySelected(filtered[newSelectedIndex] or filtered[lenFiltered])
+			end
 		end
-	end
-
-	for key, isDown in keysAreDown do
-		keysWereDown[key]:set(not isDown)
 	end
 
 	Iris.Separator()
@@ -128,6 +107,7 @@ local function List<T>(props: ListProps<T>)
 	local selectedPosition, selectedSize = Vector2.zero, Vector2.zero
 	Flex(Enum.UIFlexMode.Fill)
 	Padding({ x = UDim.new(0, Iris._config.CellPadding.X), y = UDim.new(0, Iris._config.CellPadding.Y) })
+	local tooltipVisible = false
 	for i, entry in filtered do
 		local isSelected = i == newSelectedIndex
 		-- local buttonConfig = if isSelected
@@ -147,7 +127,8 @@ local function List<T>(props: ListProps<T>)
 		Iris.End()
 		-- Iris.PopConfig()
 
-		if props.getEntryTooltip and button.hovered() then
+		if not tooltipVisible and props.getEntryTooltip and button.hovered() then
+			tooltipVisible = true
 			Iris.Tooltip({ props.getEntryTooltip(entry, props) })
 		end
 

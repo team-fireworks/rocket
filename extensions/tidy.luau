@@ -1,8 +1,9 @@
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
-local ext = Extension.new(plugin, {
+local ext = createCoreExtension({
 	id = "rocket-tidy",
 	title = "Tidy",
 	description = "TBA",
@@ -23,11 +24,11 @@ for _, containerFrom in CONTAINERS do
 			id = string.lower(`{containerFrom}-to-{containerTo}`),
 			title = `{containerFrom} to {containerTo}`,
 			description = `Converts all {containerFrom}s in the selection to {containerTo}s.`,
-		}, function(ctx: Extension.CommandContext)
-			ctx:recordChanges()
+		}, function(r: Extension.CommandRuntime)
+			r:recordChangeHistory()
 
 			local newSelection = {}
-			for index, selected in ctx:getSelection() do
+			for index, selected in r:getSelection() do
 				if selected:IsA(containerFrom) then
 					local newContainer = Instance.new(containerTo)
 					newContainer.Name = selected.Name
@@ -53,7 +54,7 @@ for _, containerFrom in CONTAINERS do
 				end
 			end
 
-			ctx:setSelection(newSelection)
+			r:setSelection(newSelection)
 		end)
 	end
 
@@ -61,8 +62,8 @@ for _, containerFrom in CONTAINERS do
 	-- 	id = string.lower(`group-{containerFrom}`),
 	-- 	title = `Group Selection into {containerFrom}`,
 	-- 	description = `Groups the current selection into a new {containerFrom}.`,
-	-- }, function(context: Extension.CommandContext)
-	-- 	context:recordChanges()
+	-- }, function(context: Extension.CommandRuntime)
+	-- 	context:recordChangeHistory()
 
 	-- 	local container = Instance.new(containerFrom)
 	-- 	local newSelection = {}
@@ -77,11 +78,11 @@ ext:newCommand({
 	id = "ungroup",
 	title = `Ungroup Selection`,
 	description = `Expands the children of the current selection, thus ungrouping it.`,
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 
 	local newSelection = {}
-	for _, selected in ctx:getSelection() do
+	for _, selected in r:getSelection() do
 		local parent = selected.Parent
 		for _, children in selected:GetChildren() do
 			children.Parent = parent
@@ -90,7 +91,7 @@ ext:newCommand({
 		selected:Destroy()
 	end
 
-	ctx:setSelection(newSelection)
+	r:setSelection(newSelection)
 end)
 
 return ext

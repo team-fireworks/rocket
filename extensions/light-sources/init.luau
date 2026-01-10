@@ -4,19 +4,19 @@ local UserInputService = game:GetService("UserInputService")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local getRepositionState = require("@self/utils/getRepositionState")
 local repositions = require("@self/repositions")
 local sources = require("@self/sources")
 local types = require("@self/types")
 
-local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
-local ext = Extension.new(plugin, {
+local ext = createCoreExtension {
 	id = "rocket-light-sources",
 	title = "Light Sources",
 	description = "Artist-friendly visual control of the sun, the moon, and light instances.",
 	icon = assets.extensions.lighting.sun,
 	authors = { "znotfireman" },
-})
+}
 
 for _, source in sources do
 	for _, reposition in repositions do
@@ -24,15 +24,15 @@ for _, source in sources do
 			id = string.lower(`repositions-{source.name}-by-{reposition.name}`),
 			title = `Reposition {source.name} by {reposition.name}`,
 			description = `Repositions the {source.name} by {reposition.describedBy}.`,
-		}, function(ctx: Extension.CommandContext)
-			ctx:recordChanges()
+		}, function(r: Extension.CommandRuntime)
+			r:recordChangeHistory()
 			local initial: types.RepositionState = nil :: any
 			local hasInitiallyClicked = false
 
-			local commandResult = ctx:newResult()
-			function commandResult.renderViewport()
+			local output = r:createCommandOutput()
+			function output.renderViewport()
 				if UserInputService:IsKeyDown(Enum.KeyCode.Escape) then
-					ctx.trove:Clean()
+					r.trove:Clean()
 					return
 				end
 
@@ -41,13 +41,13 @@ for _, source in sources do
 					if not isMouseDown then
 						initial = nil :: any
 						hasInitiallyClicked = false
-						ctx:cleanup()
+						r:cleanup()
 						return
 					end
 
-					local now = getRepositionState(ctx)
+					local now = getRepositionState(r)
 					initial = initial or now
-					local direction = reposition.updateDirection(initial, getRepositionState(ctx), true)
+					local direction = reposition.updateDirection(initial, getRepositionState(r), true)
 					if direction then
 						source.updateDirection(direction)
 					else
@@ -55,12 +55,12 @@ for _, source in sources do
 						Lighting.GeographicLatitude = initial.geographicLatitude
 					end
 				elseif isMouseDown then
-					ctx:setSelection({})
+					r:setSelection({})
 					hasInitiallyClicked = true
 				end
 			end
 
-			return commandResult
+			return output
 		end)
 	end
 end
@@ -69,12 +69,12 @@ ext:newCommand({
 	id = "reposition",
 	title = "Reposition Light Sources",
 	description = "Summons a toolbar to visually drag and adjust the sun, the moon, and light instances.",
-}, function(ctx: Extension.CommandContext)
-	local result = ctx:newResult()
+}, function(r: Extension.CommandRuntime)
+	local result = r:createCommandOutput()
 
 	function result.renderViewport()
 		if Iris.Window({ "Reposition Light Sources" }).closed() then
-			ctx:cleanup()
+			r:cleanup()
 			Iris.End()
 			return
 		end

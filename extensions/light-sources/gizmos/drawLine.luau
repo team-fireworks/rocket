@@ -1,4 +1,4 @@
-local Gizmos = require("@src/Gizmos")
+local Gizmos = require("@src/core/Gizmos")
 
 local function drawLine(from: CFrame, to: CFrame)
 	Gizmos.drawSphere(from, Gizmos.POINT_RADIUS)

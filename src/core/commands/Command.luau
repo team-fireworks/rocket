@@ -34,7 +34,7 @@ function Command.getIcon(self: Command): string
 end
 
 function Command.getFullId(self: Command)
-	return self._extension.metadata.id .. ":" .. self.interface.id
+	return self._extension.interface.id .. ":" .. self.interface.id
 end
 
 function Command.compareTitles(lhs: Command, rhs: Command)

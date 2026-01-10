@@ -16,13 +16,13 @@ LauncherStore.searchResults = Charm.computed(function(): { Command.Command }
 
 	local haystack = table.clone(allCommands)
 	if search ~= "" then
-		local commandResults = fzy.filter(search, Extension._commandTitles(), false)
+		local outputs = fzy.filter(search, Extension._commandTitles(), false)
 
 		local extensions = Extension._extensionsSortedByTitle()
 		local extensionResults = fzy.filter(search, Extension._extensionTitles(), false)
 
 		local combined: { [number]: { number } } = {}
-		for _, result in commandResults do
+		for _, result in outputs do
 			-- command titles has priority over extension titles
 			result[3] *= 1000
 			combined[result[1]] = result
@@ -31,9 +31,9 @@ LauncherStore.searchResults = Charm.computed(function(): { Command.Command }
 		for _, result in extensionResults do
 			for _, command in extensions[result[1]]._commands do
 				local commandIndex = commandToIndex[command]
-				local commandResult = combined[commandIndex]
-				if commandResult then
-					commandResult[3] += result[3]
+				local output = combined[commandIndex]
+				if output then
+					output[3] += result[3]
 				else
 					combined[commandIndex] = { commandToIndex[command], 0, result[3] }
 				end

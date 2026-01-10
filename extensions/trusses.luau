@@ -1,14 +1,14 @@
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
-local plugin = require("@src/plugin")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
-local ext = Extension.new(plugin, {
+local ext = createCoreExtension {
 	id = "rocket-trusses",
 	title = "Trusses",
 	description = "Quickly fill TrussParts with solid materials for obbies.",
 	icon = assets.extensions.rocket,
 	authors = { "Team Fireworks" },
-})
+}
 
 local TRUSS_FILLER_TAG = `Rocket Geometry: Truss Filler`
 
@@ -61,8 +61,8 @@ ext:newCommand({
 	id = `fill-trusses`,
 	title = `Fill Trusses`,
 	description = `Fills the insides of selected TrussParts, then selects the fills.`,
-}, function(context: Extension.CommandContext)
-	context:recordChanges()
+}, function(context: Extension.CommandRuntime)
+	context:recordChangeHistory()
 	context:setSelection(fillRecursive(context:getSelection()))
 end)
 
@@ -70,8 +70,8 @@ ext:newCommand({
 	id = "delete-truss-fill",
 	title = "Delete Truss Fill",
 	description = "Deletes fills in selected TrussParts that was created by this extension.",
-}, function(context: Extension.CommandContext)
-	context:recordChanges()
+}, function(context: Extension.CommandRuntime)
+	context:recordChangeHistory()
 
 	for _, selected in context:getSelection() do
 		if selected:HasTag(TRUSS_FILLER_TAG) then

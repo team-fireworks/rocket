@@ -1,4 +1,4 @@
-local Gizmos = require("@src/Gizmos")
+local Gizmos = require("@src/core/Gizmos")
 
 local LENGTH = 5
 

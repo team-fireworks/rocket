@@ -16,9 +16,10 @@
 local UserInputService = game:GetService("UserInputService")
 
 local Extension = require("@src/core/Extension")
-local Gizmos = require("@src/Gizmos")
+local Gizmos = require("@src/core/Gizmos")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 -- TODO: this is performant but can this be simplified?
 local function getNextArcCFrame(
@@ -134,10 +135,10 @@ local function renderArcs(
 	return current
 end
 
-local ext = Extension.new(plugin, {
-	id = "rocket=arcs",
+local ext = createCoreExtension({
+	id = "rocket-arcs",
 	title = "Arcs",
-	description = "Create smooth arcs comprised of selected parts.",
+	description = "Create smooth arcs from the selected parts.",
 	icon = assets.extensions.rocket,
 	authors = { "Sylvia" },
 })
@@ -145,14 +146,14 @@ local ext = Extension.new(plugin, {
 ext:newCommand({
 	id = "arc-part",
 	title = "Arc Part",
-	description = "Creates a smooth arc of selected part.",
-}, function(ctx: Extension.CommandContext)
-	local commandResult = ctx:newResult()
+	description = "Creates a smooth arc from the selected parts.",
+}, function(r: Extension.CommandRuntime)
+	local output = r:createCommandOutput()
 
-	function commandResult.renderWindow(window: Iris.Window)
+	function output.renderWindow(window: Iris.Window)
 		local windowPositionState, windowSizeState = window.state.position, window.state.size
 
-		local mouse = ctx:getMouse()
+		local mouse = r:getMouse()
 		local windowPosition = windowPositionState:get()
 		local windowSize = windowSizeState:get()
 		local mouseIsInWindow = mouse.X > windowPosition.X
@@ -194,7 +195,7 @@ ext:newCommand({
 		local angleRadians = math.rad(angleDegrees)
 		Iris.SliderNum({ "Angle", 1, -180, 180 }, { number = angleState })
 
-		local selections = ctx:getSelection()
+		local selections = r:getSelection()
 		for _, instance in selections do
 			if instance:IsA("BasePart") then
 				local size = instance.Size
@@ -222,21 +223,19 @@ ext:newCommand({
 		Iris.SameLine()
 
 		if Iris.Button({ `Render ({amountState:get()})` }).clicked() then
-			local finish = ctx:recordChanges("render-all", "Render Arc Parts")
-			ctx:setSelection(
-				renderArcs(ctx:getSelection(), amountState:get(), angleRadians, rotationType, selectedFace)
-			)
+			local finish = r:recordChangeHistory({ name = "render-all", displayName = "Render Arc Parts" })
+			r:setSelection(renderArcs(r:getSelection(), amountState:get(), angleRadians, rotationType, selectedFace))
 			finish()
 		end
 
 		if Iris.Button({ `Render All ({renderAllCount})` }).clicked() then
-			local finish = ctx:recordChanges("render-all", "Render All in Arc Parts")
-			ctx:setSelection(renderArcs(ctx:getSelection(), renderAllCount, angleRadians, rotationType, selectedFace))
+			local finish = r:recordChangeHistory({ name = "render-all", displayName = "Render All in Arc Parts" })
+			r:setSelection(renderArcs(r:getSelection(), renderAllCount, angleRadians, rotationType, selectedFace))
 			finish()
 		end
 
 		Iris.End()
 	end
 
-	return commandResult
+	return output
 end)

@@ -7,9 +7,12 @@ local pluginTrove = require("@src/pluginTrove")
 local types = require("@src/types")
 
 local function runCommand(command: Command.Command)
-	local existingScope = CommandStore.runtimes()[command]
-	if existingScope then
-		existingScope.log:warn("Cannot concurrently run a command multiple times.")
+	local existing = CommandStore.runtimes()[command]
+	if existing then
+		existing.log:warn(
+			"Cannot concurrently run a command multiple times."
+				.. " If a command is misbehaving, use the Kill Command from the Rocket extension."
+		)
 		return
 	end
 
@@ -19,7 +22,7 @@ local function runCommand(command: Command.Command)
 	atoms.set(CommandStore.runtimes, command, runtime)
 	trove:Add(function()
 		atoms.set(CommandStore.runtimes, command, nil :: never)
-		atoms.set(CommandStore.runtimes, command, nil :: never)
+		atoms.set(CommandStore.uiOutputs, command, nil :: never)
 	end)
 
 	runtime.log:trace("Running command", command:getFullId())

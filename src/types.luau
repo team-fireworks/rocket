@@ -75,7 +75,7 @@ local CommandOutput = Boba.Struct {
 	windowArgs = Boba.Unknown:Array():Optional().inner,
 	windowConfig = Boba.String:Map(Boba.Any):Optional().inner,
 	renderWindow = Boba.Function:Optional():Nickname("(Iris.Window) -> ()?").inner :: (window: Iris.Window) -> ()?,
-}:Nickname("CommandResult")
+}:Nickname("output")
 
 export type Author = typeof(Author.inner)
 export type ExtensionInterface = typeof(ExtensionInterface.inner)

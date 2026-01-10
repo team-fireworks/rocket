@@ -10,6 +10,7 @@ local fzy = require("@include/fzy")
 local noop = require("@src/utils/noop")
 local plugin = require("@src/plugin")
 local types = require("@src/types")
+local useKeys = require("@src/core/hooks/useKeys")
 
 --[=[
 	@class CommandRuntime
@@ -27,7 +28,7 @@ local types = require("@src/types")
 		title = "Hello World",
 		description = "A test command"
 	}, function(r: Rocket.Runtime)
-		local result = r.newResult()
+		local result = r.createCommandOutput()
 
 		function result.renderWindow()
 			if r.Iris.Button({ "Close command" }).clicked() then
@@ -53,20 +54,20 @@ function CommandRuntime.cleanup(self: CommandRuntime)
 	self.trove:Clean()
 end
 
-function CommandRuntime.createCommandOutput(): types.CommandOutput
+function CommandRuntime:createCommandOutput(): types.CommandOutput
 	return {}
 end
 
 -- Plugin
-function CommandRuntime.getMouse()
+function CommandRuntime:getMouse()
 	return assert(plugin:GetMouse())
 end
 
-function CommandRuntime.getSelection()
+function CommandRuntime:getSelection()
 	return Selection:Get()
 end
 
-function CommandRuntime.setSelection(instances: { Instance })
+function CommandRuntime:setSelection(instances: { Instance })
 	Selection:Set(instances)
 end
 
@@ -95,7 +96,9 @@ function CommandRuntime.recordChangeHistory(self: CommandRuntime, recordingOptio
 
 	local name = if options.name then `{self.command:getFullId()}/{options.name}` else self.command:getFullId()
 	local displayName = "Rocket: "
-		.. if options.displayName then `{self.command.title} - {options.displayName}` else self.command.title
+		.. if options.displayName
+			then `{self.command.interface.title} - {options.displayName}`
+			else self.command.interface.title
 
 	local success, id: string? = pcall(ChangeHistoryService.TryBeginRecording, ChangeHistoryService, name, displayName)
 
@@ -125,6 +128,23 @@ function CommandRuntime.recordChangeHistory(self: CommandRuntime, recordingOptio
 
 	self.trove:Add(finishRecording :: any)
 	return finishRecording
+end
+
+-- Keys
+function CommandRuntime:useKeyDown(keyCode: Enum.KeyCode)
+	return useKeys.isDown(keyCode)
+end
+
+function CommandRuntime:useKeyJustPressed(keyCode: Enum.KeyCode)
+	return useKeys.isJustPressed(keyCode)
+end
+
+function CommandRuntime:useKeyJustReleased(keyCode: Enum.KeyCode)
+	return useKeys.isJustReleased(keyCode)
+end
+
+function CommandRuntime:consumeKeyPressed(keyCode: Enum.KeyCode)
+	return useKeys.andConsumePress(keyCode)
 end
 
 return table.freeze(CommandRuntime)

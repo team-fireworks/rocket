@@ -4,8 +4,8 @@ local Workspace = game:GetService("Workspace")
 local Extension = require("@src/core/Extension")
 local types = require("../types")
 
-local function useRepositionState(ctx: Extension.CommandContext): types.RepositionState
-	local mouse = ctx:getMouse()
+local function useRepositionState(r: Extension.CommandRuntime): types.RepositionState
+	local mouse = r:getMouse()
 	return {
 		clockTime = Lighting.ClockTime,
 		geographicLatitude = Lighting.GeographicLatitude,

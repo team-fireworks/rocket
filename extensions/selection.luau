@@ -5,23 +5,23 @@ local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local RegExp = require("@pkgs/RegExp")
 local assets = require("@include/assets")
+local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local widgets = require("@src/widgets")
 
-local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
-local ext = Extension.new(plugin, {
+local ext = createCoreExtension {
 	id = "rocket-selection",
 	title = "Selection",
 	description = "Expanding, reducing, and transforming instance selections.",
 	icon = assets.extensions.selection,
 	authors = { "Team Fireworks" },
-})
+}
 
 ext:newCommand({
 	id = "select-children",
 	title = "Select Children",
 	description = "Selects children of the current selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 	local oldSelection = Selection:Get()
 	local newSelection = table.clone(oldSelection)
 	for _, selected in oldSelection do
@@ -35,60 +35,60 @@ ext:newCommand({
 	id = "select-descendants",
 	title = "Select Descendants",
 	description = "Selects descendants of the current selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 	local oldSelection = Selection:Get()
 	local newSelection = table.clone(oldSelection)
 	for _, selected in oldSelection do
 		local descendants = selected:GetDescendants()
 		table.move(descendants, 1, #descendants, #newSelection + 1, newSelection)
 	end
-	Selection:Set(newSelection)
+	r:setSelection(newSelection)
 end)
 
 ext:newCommand({
 	id = "select-just-children",
 	title = "Select Just Children",
 	description = "Selects only the children of the current selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 	local newSelection = {}
-	for _, selected in Selection:Get() do
+	for _, selected in r:getSelection() do
 		local children = selected:GetChildren()
 		table.move(children, 1, #children, #newSelection + 1, newSelection)
 	end
-	Selection:Set(newSelection)
+	r:setSelection(newSelection)
 end)
 
 ext:newCommand({
 	id = "select-just-descendants",
 	title = "Select Just Descendants",
 	description = "Selects only the descendants of the current selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 	local newSelection = {}
 	for _, selected in Selection:Get() do
 		local descendants = selected:GetDescendants()
 		table.move(descendants, 1, #descendants, #newSelection + 1, newSelection)
 	end
-	Selection:Set(newSelection)
+	r:setSelection(newSelection)
 end)
 
 ext:newCommand({
 	id = "select-just-first",
 	title = "Select Just First",
 	description = "Reduce to just your first selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
-	Selection:Set({ Selection:Get()[1] })
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
+	r:setSelection({ r:getSelection()[1] })
 end)
 
 ext:newCommand({
 	id = "select-just-last",
 	title = "Select Just Last",
 	description = "Reduce to just your last selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 	local oldSelection = Selection:Get()
 	Selection:Set({ oldSelection[#oldSelection] })
 end)
@@ -97,18 +97,18 @@ ext:newCommand({
 	id = "deselect-all",
 	title = "Deselect All",
 	description = "Clears your selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
-	ctx:setSelection({})
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
+	r:setSelection({})
 end)
 
 ext:newCommand({
 	id = "destroy-selection",
 	title = "Destroy Selection",
 	description = "Destroys the selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
-	for _, instance in ctx:getSelection() do
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
+	for _, instance in r:getSelection() do
 		pcall(game.Destroy, instance)
 	end
 end)
@@ -117,9 +117,9 @@ ext:newCommand({
 	id = "destroy-just-children",
 	title = "Destroy Just Children",
 	description = "Destroys just the children of the current selection.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
-	for _, parent in ctx:getSelection() do
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
+	for _, parent in r:getSelection() do
 		for _, children in parent:GetChildren() do
 			pcall(game.Destroy, children)
 		end
@@ -131,13 +131,13 @@ ext:newCommand({
 	id = "rename-selection",
 	title = "Rename Selection",
 	description = "Renames the current selection to the given pattern.",
-}, function(ctx: Extension.CommandContext)
-	ctx:recordChanges()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 
 	local firstRun = true
-	local commandResult: Extension.CommandResult = {}
+	local output = r.createCommandOutput()
 
-	function commandResult.renderWindow(window: Iris.Window)
+	function output.renderWindow(window: Iris.Window)
 		if firstRun then
 			firstRun = false
 
@@ -147,14 +147,14 @@ ext:newCommand({
 			window.state.size:set(windowSize)
 		end
 
-		local selection = ctx:getSelection()
+		local selection = r:getSelection()
 
 		Iris.SameLine()
 
 		---
 
-		widgets.Frame { Size = UDim2.fromScale(0, 1), AutomaticSize = Enum.AutomaticSize.None }
-		widgets.Flex { Mode = Enum.UIFlexMode.Fill }
+		widgets.Frame { size = UDim2.fromScale(0, 1), automaticSize = Enum.AutomaticSize.None }
+		widgets.Flex(Enum.UIFlexMode.Fill)
 
 		Iris.SeparatorText { `Rename {#selection} instances` }
 
@@ -188,14 +188,14 @@ ext:newCommand({
 		renameInput.state.text:set(rawRename)
 		Iris.End()
 
-		widgets.FlexFiller { Mode = Enum.UIFlexMode.Fill }
+		widgets.FlexSpacer(Enum.UIFlexMode.Fill)
 
 		Iris.Button { "Rename" }
 		widgets.Subtext { "This command supports regular expressions!" }
 
 		Iris.End()
 
-		widgets.Frame { Size = UDim2.fromScale(1 / 3, 1), AutomaticSize = Enum.AutomaticSize.None }
+		widgets.Frame { size = UDim2.fromScale(1 / 3, 1), automaticSize = Enum.AutomaticSize.None }
 		Iris.SeparatorText { "Preview" }
 		Iris.End()
 
@@ -204,7 +204,7 @@ ext:newCommand({
 		---
 	end
 
-	return commandResult
+	return output
 end)
 
 return ext
