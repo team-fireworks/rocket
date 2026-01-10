@@ -5,6 +5,7 @@ local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local RegExp = require("@pkgs/RegExp")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local widgets = require("@src/widgets")
 
@@ -13,7 +14,9 @@ local ext = createCoreExtension {
 	title = "Selection",
 	description = "Expanding, reducing, and transforming instance selections.",
 	icon = assets.extensions.selection,
-	authors = { "Team Fireworks" },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 }
 
 ext:newCommand({
@@ -53,7 +56,7 @@ ext:newCommand({
 }, function(r: Extension.CommandRuntime)
 	r:recordChangeHistory()
 	local newSelection = {}
-	for _, selected in r:getSelection() do
+	for _, selected in r:useSelection() do
 		local children = selected:GetChildren()
 		table.move(children, 1, #children, #newSelection + 1, newSelection)
 	end
@@ -80,7 +83,7 @@ ext:newCommand({
 	description = "Reduce to just your first selection.",
 }, function(r: Extension.CommandRuntime)
 	r:recordChangeHistory()
-	r:setSelection({ r:getSelection()[1] })
+	r:setSelection({ r:useSelection()[1] })
 end)
 
 ext:newCommand({
@@ -108,7 +111,7 @@ ext:newCommand({
 	description = "Destroys the selection.",
 }, function(r: Extension.CommandRuntime)
 	r:recordChangeHistory()
-	for _, instance in r:getSelection() do
+	for _, instance in r:useSelection() do
 		pcall(game.Destroy, instance)
 	end
 end)
@@ -119,7 +122,7 @@ ext:newCommand({
 	description = "Destroys just the children of the current selection.",
 }, function(r: Extension.CommandRuntime)
 	r:recordChangeHistory()
-	for _, parent in r:getSelection() do
+	for _, parent in r:useSelection() do
 		for _, children in parent:GetChildren() do
 			pcall(game.Destroy, children)
 		end
@@ -135,7 +138,7 @@ ext:newCommand({
 	r:recordChangeHistory()
 
 	local firstRun = true
-	local output = r.createCommandOutput()
+	local output = r:createCommandOutput()
 
 	function output.renderWindow(window: Iris.Window)
 		if firstRun then
@@ -147,7 +150,7 @@ ext:newCommand({
 			window.state.size:set(windowSize)
 		end
 
-		local selection = r:getSelection()
+		local selection = r:useSelection()
 
 		Iris.SameLine()
 

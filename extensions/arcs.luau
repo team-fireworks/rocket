@@ -1,17 +1,7 @@
---[[
-    arcs.luau
-
-    Part of the `geometry` extension. Creates smooth arcs comprised of a selected part.
-
-    Credit to the Archimedes plugin for the original concept and inspiration of implementation: https://devforum.roblox.com/t/introducing-archimedes-3-a-building-plugin/1610366
-
-    Author: Sylvia
-    - Roblox Profile: https://www.roblox.com/users/3814464357/profile
-    - Github Profile: https://github.com/selectgender
-    - Discord Username: selectgender
-]]
-
--- TODO(znotfireman): more expressive authors
+-- Concept inspired by the Archimedes plugin:
+-- 	   https://devforum.roblox.com/t/introducing-archimedes-3-a-building-plugin/1610366
+-- Original PR:
+--	   https://github.com/team-fireworks/rocket/pull/9
 
 local UserInputService = game:GetService("UserInputService")
 
@@ -19,83 +9,53 @@ local Extension = require("@src/core/Extension")
 local Gizmos = require("@src/core/Gizmos")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
--- TODO: this is performant but can this be simplified?
+local FACE_AXES: { [Enum.NormalId]: { normal: Vector3, u: Vector3, v: Vector3 } } = {
+	[Enum.NormalId.Top] = { normal = Vector3.yAxis, u = Vector3.xAxis, v = -Vector3.zAxis },
+	[Enum.NormalId.Bottom] = { normal = -Vector3.yAxis, u = Vector3.xAxis, v = Vector3.zAxis },
+	[Enum.NormalId.Left] = { normal = -Vector3.xAxis, u = Vector3.zAxis, v = Vector3.yAxis },
+	[Enum.NormalId.Right] = { normal = Vector3.xAxis, u = -Vector3.zAxis, v = Vector3.yAxis },
+	[Enum.NormalId.Front] = { normal = -Vector3.zAxis, u = Vector3.xAxis, v = Vector3.yAxis },
+	[Enum.NormalId.Back] = { normal = Vector3.zAxis, u = -Vector3.xAxis, v = Vector3.yAxis },
+}
+
+local ROTATION_AXES = {
+	Pitch = Vector3.xAxis,
+	Yaw = Vector3.yAxis,
+	Roll = Vector3.zAxis,
+}
+
+local ext = createCoreExtension({
+	id = "rocket-arcs",
+	title = "Arcs",
+	description = "Create smooth arcs from the selected parts.",
+	icon = assets.extensions.rocket,
+	authors = {
+		{ type = "user", id = constants.userIds.syylvi },
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
+})
+
 local function getNextArcCFrame(
 	angle: number,
 	rotationType: string,
 	face: Enum.NormalId,
-	cframe: CFrame,
+	transform: CFrame,
 	size: Vector3
 ): CFrame
-	local offset: CFrame
-	local pivot_offset: CFrame
-	local angle_cframe: CFrame
+	local axis = ROTATION_AXES[rotationType]
+	local faceAxes = FACE_AXES[face]
 
-	if face == Enum.NormalId.Top then
-		offset = CFrame.new(0, size.Y, 0)
+	local sign = math.sign(angle)
+	local offset = CFrame.new(faceAxes.normal.X * size.X, faceAxes.normal.Y * size.Y, faceAxes.normal.Z * size.Z)
+	local pivot = (faceAxes.u * sign + faceAxes.v) * (size / 2)
 
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(0, -size.Y / 2, math.sign(angle) * -size.Z / 2)
-			angle_cframe = CFrame.Angles(angle, 0, 0)
-		elseif rotationType == "Roll" then
-			pivot_offset = CFrame.new(math.sign(angle) * size.X / 2, -size.Y / 2, 0)
-			angle_cframe = CFrame.Angles(0, 0, angle)
-		end
-	elseif face == Enum.NormalId.Bottom then
-		offset = CFrame.new(0, -size.Y, 0)
+	local pivotCF = CFrame.new(pivot)
+	local angleCF = CFrame.fromAxisAngle(axis, angle)
 
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(0, size.Y / 2, math.sign(angle) * size.Z / 2)
-			angle_cframe = CFrame.Angles(angle, 0, 0)
-		elseif rotationType == "Roll" then
-			pivot_offset = CFrame.new(math.sign(angle) * -size.X / 2, size.Y / 2, 0)
-			angle_cframe = CFrame.Angles(0, 0, angle)
-		end
-	elseif face == Enum.NormalId.Left then
-		offset = CFrame.new(-size.X, 0, 0)
-
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(size.X / 2, math.sign(angle) * size.Y / 2, 0)
-			angle_cframe = CFrame.Angles(0, 0, angle)
-		elseif rotationType == "Yaw" then
-			pivot_offset = CFrame.new(size.X / 2, 0, math.sign(angle) * -size.Z / 2)
-			angle_cframe = CFrame.Angles(0, angle, 0)
-		end
-	elseif face == Enum.NormalId.Right then
-		offset = CFrame.new(size.X, 0, 0)
-
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(-size.X / 2, math.sign(angle) * -size.Y / 2, 0)
-			angle_cframe = CFrame.Angles(0, 0, angle)
-		elseif rotationType == "Yaw" then
-			pivot_offset = CFrame.new(-size.X / 2, 0, math.sign(angle) * size.Z / 2)
-			angle_cframe = CFrame.Angles(0, angle, 0)
-		end
-	elseif face == Enum.NormalId.Front then
-		offset = CFrame.new(0, 0, -size.Z)
-
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(0, math.sign(angle) * -size.Y / 2, size.Z / 2)
-			angle_cframe = CFrame.Angles(angle, 0, 0)
-		elseif rotationType == "Yaw" then
-			pivot_offset = CFrame.new(math.sign(angle) * size.X / 2, 0, size.Z / 2)
-			angle_cframe = CFrame.Angles(0, angle, 0)
-		end
-	elseif face == Enum.NormalId.Back then
-		offset = CFrame.new(0, 0, size.Z)
-
-		if rotationType == "Pitch" then
-			pivot_offset = CFrame.new(0, math.sign(angle) * size.Y / 2, -size.Z / 2)
-			angle_cframe = CFrame.Angles(angle, 0, 0)
-		elseif rotationType == "Yaw" then
-			pivot_offset = CFrame.new(math.sign(angle) * -size.X / 2, 0, -size.Z / 2)
-			angle_cframe = CFrame.Angles(0, angle, 0)
-		end
-	end
-
-	return cframe * offset * pivot_offset * angle_cframe * pivot_offset:Inverse()
+	return transform * offset * pivotCF * angleCF * pivotCF:Inverse()
 end
 
 local function renderArcs(
@@ -134,14 +94,6 @@ local function renderArcs(
 
 	return current
 end
-
-local ext = createCoreExtension({
-	id = "rocket-arcs",
-	title = "Arcs",
-	description = "Create smooth arcs from the selected parts.",
-	icon = assets.extensions.rocket,
-	authors = { "Sylvia" },
-})
 
 ext:newCommand({
 	id = "arc-part",
@@ -195,7 +147,7 @@ ext:newCommand({
 		local angleRadians = math.rad(angleDegrees)
 		Iris.SliderNum({ "Angle", 1, -180, 180 }, { number = angleState })
 
-		local selections = r:getSelection()
+		local selections = r:useSelection()
 		for _, instance in selections do
 			if instance:IsA("BasePart") then
 				local size = instance.Size
@@ -224,14 +176,14 @@ ext:newCommand({
 
 		if Iris.Button({ `Render ({amountState:get()})` }).clicked() then
 			local finish = r:recordChangeHistory({ name = "render-all", displayName = "Render Arc Parts" })
-			r:setSelection(renderArcs(r:getSelection(), amountState:get(), angleRadians, rotationType, selectedFace))
-			finish()
+			r:setSelection(renderArcs(r:useSelection(), amountState:get(), angleRadians, rotationType, selectedFace))
+			finish(Enum.FinishRecordingOperation.Commit)
 		end
 
 		if Iris.Button({ `Render All ({renderAllCount})` }).clicked() then
 			local finish = r:recordChangeHistory({ name = "render-all", displayName = "Render All in Arc Parts" })
-			r:setSelection(renderArcs(r:getSelection(), renderAllCount, angleRadians, rotationType, selectedFace))
-			finish()
+			r:setSelection(renderArcs(r:useSelection(), renderAllCount, angleRadians, rotationType, selectedFace))
+			finish(Enum.FinishRecordingOperation.Commit)
 		end
 
 		Iris.End()
@@ -239,3 +191,5 @@ ext:newCommand({
 
 	return output
 end)
+
+return ext

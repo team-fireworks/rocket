@@ -63,7 +63,7 @@ ext:newCommand({
 	description = `Fills the insides of selected TrussParts, then selects the fills.`,
 }, function(context: Extension.CommandRuntime)
 	context:recordChangeHistory()
-	context:setSelection(fillRecursive(context:getSelection()))
+	context:setSelection(fillRecursive(context:useSelection()))
 end)
 
 ext:newCommand({
@@ -73,7 +73,7 @@ ext:newCommand({
 }, function(context: Extension.CommandRuntime)
 	context:recordChangeHistory()
 
-	for _, selected in context:getSelection() do
+	for _, selected in context:useSelection() do
 		if selected:HasTag(TRUSS_FILLER_TAG) then
 			selected:Destroy()
 			continue

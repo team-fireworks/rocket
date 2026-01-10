@@ -3,15 +3,18 @@ local CommandStore = require("@src/core/commands/CommandStore")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local widgets = require("@src/widgets")
 
 local ext = createCoreExtension {
 	id = "rocket",
 	title = "Rocket",
-	description = "Testing extension",
+	description = "Basic Rocket utilities and commands.",
 	icon = assets.extensions.rocket,
-	authors = { "Basic Rocket utilities and commands." },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 }
 
 ext:newCommand({

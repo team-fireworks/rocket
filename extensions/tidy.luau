@@ -1,14 +1,16 @@
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
-local plugin = script:FindFirstAncestorWhichIsA("Plugin") :: Plugin
 local ext = createCoreExtension({
 	id = "rocket-tidy",
 	title = "Tidy",
-	description = "TBA",
+	description = "Keep your game organized.",
 	icon = assets.extensions.rocket,
-	authors = { "znotfireman" },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 })
 
 local CONTAINERS = { "Folder", "Model" }
@@ -28,7 +30,7 @@ for _, containerFrom in CONTAINERS do
 			r:recordChangeHistory()
 
 			local newSelection = {}
-			for index, selected in r:getSelection() do
+			for index, selected in r:useSelection() do
 				if selected:IsA(containerFrom) then
 					local newContainer = Instance.new(containerTo)
 					newContainer.Name = selected.Name
@@ -67,7 +69,7 @@ for _, containerFrom in CONTAINERS do
 
 	-- 	local container = Instance.new(containerFrom)
 	-- 	local newSelection = {}
-	-- 	for index, selected in context:getSelection() do
+	-- 	for index, selected in context:useSelection() do
 	-- 	end
 
 	-- 	context:setSelection({container})
@@ -82,7 +84,7 @@ ext:newCommand({
 	r:recordChangeHistory()
 
 	local newSelection = {}
-	for _, selected in r:getSelection() do
+	for _, selected in r:useSelection() do
 		local parent = selected.Parent
 		for _, children in selected:GetChildren() do
 			children.Parent = parent

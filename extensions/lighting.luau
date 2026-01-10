@@ -2,6 +2,7 @@ local Lighting = game:GetService("Lighting")
 
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 local ext = createCoreExtension {
@@ -9,7 +10,9 @@ local ext = createCoreExtension {
 	title = "Lighting",
 	description = "Artist-friendly lighting control with visual control of the sun and moon.",
 	icon = assets.extensions.lighting.sun,
-	authors = { "Team Fireworks" },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 }
 
 ext:newCommand({

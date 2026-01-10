@@ -28,7 +28,7 @@ local useKeys = require("@src/core/hooks/useKeys")
 		title = "Hello World",
 		description = "A test command"
 	}, function(r: Rocket.Runtime)
-		local result = r.createCommandOutput()
+		local result = r:createCommandOutput()
 
 		function result.renderWindow()
 			if r.Iris.Button({ "Close command" }).clicked() then
@@ -63,12 +63,13 @@ function CommandRuntime:getMouse()
 	return assert(plugin:GetMouse())
 end
 
-function CommandRuntime:getSelection()
+function CommandRuntime:useSelection()
 	return Selection:Get()
 end
 
 function CommandRuntime:setSelection(instances: { Instance })
 	Selection:Set(instances)
+	return instances
 end
 
 -- History

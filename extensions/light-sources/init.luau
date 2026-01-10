@@ -4,6 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local getRepositionState = require("@self/utils/getRepositionState")
 local repositions = require("@self/repositions")
@@ -15,7 +16,9 @@ local ext = createCoreExtension {
 	title = "Light Sources",
 	description = "Artist-friendly visual control of the sun, the moon, and light instances.",
 	icon = assets.extensions.lighting.sun,
-	authors = { "znotfireman" },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 }
 
 for _, source in sources do

@@ -1,5 +1,6 @@
 local Extension = require("@src/core/Extension")
 local assets = require("@include/assets")
+local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 local ext = createCoreExtension({
@@ -7,7 +8,9 @@ local ext = createCoreExtension({
 	title = "Color Picker",
 	description = "TBA",
 	icon = assets.extensions.rocket,
-	authors = { "znotfireman" },
+	authors = {
+		{ type = "user", id = constants.userIds.znotfireman },
+	},
 })
 
 ext:newCommand({
