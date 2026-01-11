@@ -1,27 +1,34 @@
 local Boba = require("@include/boba")
 local Iris = require("@src/Iris")
 
-local Author = Boba.String
-	:Or(Boba.Struct {
-		type = Boba.Literal("user").inner :: "user",
-		id = Boba.Number.inner,
-	})
-	:Or(Boba.Struct {
-		type = Boba.Literal("group").inner :: "group",
-		id = Boba.Number.inner,
-	})
-	:Or(Boba.Struct {
-		type = Boba.Literal("custom").inner :: "custom",
-		icon = Boba.String.inner,
-		name = Boba.String.inner,
-	})
+local AuthorUser = Boba.Struct {
+	type = Boba.Literal("user").inner :: "user",
+	id = Boba.Number.inner,
+}:Nickname("AuthorUser")
+
+local AuthorCustom = Boba.Struct {
+	type = Boba.Literal("custom").inner :: "custom",
+	image = Boba.String.inner,
+	name = Boba.String.inner,
+}:Nickname("AuthorCustom")
+
+local Author = Boba
+	.String
+	:Or(AuthorUser)
+	-- :Or(Boba.Struct {
+	-- 	type = Boba.Literal("group").inner :: "group",
+	-- 	id = Boba.Number.inner,
+	-- })
+	:Or(
+		AuthorCustom
+	)
 	:Nickname("Author")
 
 local ExtensionInterface = Boba.Struct {
 	id = Boba.String.inner,
 	title = Boba.String.inner,
 	description = Boba.String:Optional().inner,
-	authors = Author:Array().inner,
+	contributors = Author:Array().inner,
 	icon = Boba.String.inner,
 }:Nickname("ExtensionInterface")
 
@@ -63,7 +70,7 @@ local CommandInterface = Boba.Struct {
 	id = Boba.String.inner,
 	title = Boba.String.inner,
 	description = Boba.String.inner,
-	authors = Author:Array():Optional().inner,
+	contributors = Author:Array():Optional().inner,
 	icon = Boba.String:Optional().inner,
 
 	arguments = CommandArgument:Array():Optional().inner,
@@ -78,6 +85,8 @@ local CommandOutput = Boba.Struct {
 }:Nickname("output")
 
 export type Author = typeof(Author.inner)
+export type AuthorUser = typeof(AuthorUser.inner)
+export type AuthorCustom = typeof(AuthorCustom.inner)
 export type ExtensionInterface = typeof(ExtensionInterface.inner)
 export type CommandArgument = typeof(CommandArgument.inner)
 export type CommandInterface = typeof(CommandInterface.inner)

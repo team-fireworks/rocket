@@ -37,7 +37,7 @@ Internal.WidgetConstructor(
 
 			return frame
 		end,
-		Update = function(thisWidget)
+		Update = function(thisWidget: any)
 			local frame: Frame = thisWidget.Instance
 			local list: UIListLayout = (frame :: any).UIListLayout
 

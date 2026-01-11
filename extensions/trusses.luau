@@ -7,7 +7,7 @@ local ext = createCoreExtension {
 	title = "Trusses",
 	description = "Quickly fill TrussParts with solid materials for obbies.",
 	icon = assets.extensions.rocket,
-	authors = { "Team Fireworks" },
+	contributors = { "Team Fireworks" },
 }
 
 local TRUSS_FILLER_TAG = `Rocket Geometry: Truss Filler`

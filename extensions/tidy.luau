@@ -8,7 +8,7 @@ local ext = createCoreExtension({
 	title = "Tidy",
 	description = "Keep your game organized.",
 	icon = assets.extensions.rocket,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.znotfireman },
 	},
 })

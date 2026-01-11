@@ -11,6 +11,7 @@ local FlexSpacer = require("@self/styles/FlexSpacer")
 local Padding = require("@self/styles/Padding")
 local Spacer = require("@self/styles/Spacer")
 
+local Header = require("@self/typography/Header")
 local Subtext = require("@self/typography/Subtext")
 
 export type ButtonGroupProps = ButtonGroup.ButtonGroupProps
@@ -21,7 +22,8 @@ export type ListProps<T> = List.ListProps<T>
 export type ScrollingFrameProps = ScrollingFrame.ScrollingFrameProps
 
 export type PaddingProps = Padding.PaddingProps
-export type SpacerProps = Spacer.SpacerProps
+
+export type HeaderProps = Header.HeaderProps
 
 return table.freeze({
 	ButtonGroup = ButtonGroup,
@@ -38,4 +40,5 @@ return table.freeze({
 	Spacer = Spacer,
 
 	Subtext = Subtext,
+	Header = Header,
 })

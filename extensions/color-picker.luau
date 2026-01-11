@@ -8,7 +8,7 @@ local ext = createCoreExtension({
 	title = "Color Picker",
 	description = "TBA",
 	icon = assets.extensions.rocket,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.znotfireman },
 	},
 })

@@ -1,6 +1,7 @@
 local Charm = require("@pkgs/Charm")
 local Command = require("@src/core/commands/Command")
 local CommandRuntime = require("@src/core/commands/CommandRuntime")
+local assets = require("@include/assets")
 local atoms = require("@src/utils/atoms")
 local createCommand = require("@src/core/constructors/createCommand")
 local types = require("@src/types")
@@ -40,6 +41,14 @@ end
 
 function Extension.newCommand(self: Extension, interface: types.CommandInterface, runner: Command.CommandRunner)
 	self:pushCommand(createCommand(interface, runner))
+end
+
+function Extension.getcontributors(self: Extension): { types.Author }
+	return self.interface.contributors or {}
+end
+
+function Extension.getIcon(self: Extension)
+	return self.interface.icon or assets.extensions.rocket
 end
 
 function Extension.destroy(self: Extension)

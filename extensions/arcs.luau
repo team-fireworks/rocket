@@ -32,7 +32,7 @@ local ext = createCoreExtension({
 	title = "Arcs",
 	description = "Create smooth arcs from the selected parts.",
 	icon = assets.extensions.rocket,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.syylvi },
 		{ type = "user", id = constants.userIds.znotfireman },
 	},

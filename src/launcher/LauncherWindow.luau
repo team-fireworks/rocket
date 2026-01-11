@@ -3,37 +3,34 @@ local Workspace = game:GetService("Workspace")
 local Command = require("@src/core/commands/Command")
 local Iris = require("@src/Iris")
 local LauncherStore = require("./LauncherStore")
-local ids = require("@src/utils/ids")
 local runCommand = require("@src/core/commands/runCommand")
 local useKeys = require("@src/core/hooks/useKeys")
 local widgets = require("@src/widgets")
 
 local WINDOW_SIZE = Vector2.new(640, 284)
+local WINDOW_ARGS = {
+	"Rocket Launcher",
+	[Iris.Args.Window.NoTitleBar] = true,
+	[Iris.Args.Window.NoBackground] = true,
+	[Iris.Args.Window.NoCollapse] = true,
+	[Iris.Args.Window.NoClose] = true,
+	[Iris.Args.Window.NoMove] = true,
+	[Iris.Args.Window.NoResize] = true,
+	[Iris.Args.Window.NoNav] = true,
+	[Iris.Args.Window.NoMenu] = true,
+}
 
 local function LauncherWindow()
-	Iris.SetNextWidgetID(ids.rocket "launcherWindow")
-
-	local viewportSize = Workspace.CurrentCamera.ViewportSize
-	local windowPosition = Iris.State(Vector2.zero)
-
 	Iris.PushConfig {
 		WindowPadding = Vector2.zero,
 		ContentWidth = UDim.new(1, 0),
 		ItemSpacing = Vector2.new(8, 0),
 	}
 
-	local window = Iris.Window({
-		"Rocket Launcher",
-		[Iris.Args.Window.NoTitleBar] = true,
-		[Iris.Args.Window.NoBackground] = true,
-		[Iris.Args.Window.NoCollapse] = true,
-		[Iris.Args.Window.NoMove] = true,
-		[Iris.Args.Window.NoResize] = true,
-		[Iris.Args.Window.NoNav] = true,
-		[Iris.Args.Window.NoMenu] = true,
-	}, { position = windowPosition, size = WINDOW_SIZE :: any })
-
-	windowPosition:set(viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100))
+	local viewportSize = Workspace.CurrentCamera.ViewportSize
+	local windowPosition = viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100)
+	local window = Iris.Window(WINDOW_ARGS, { position = windowPosition, size = WINDOW_SIZE } :: any)
+	window.state.position:set(viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100))
 
 	if window.closed() or useKeys.andConsumePress(Enum.KeyCode.Escape) then
 		LauncherStore.isVisible(false)
@@ -65,7 +62,9 @@ local function LauncherWindow()
 		end,
 	} :: widgets.ListProps<Command.Command>)
 
-	LauncherStore.isFocused(true)
+	if not LauncherStore.isFocused() then
+		LauncherStore.isFocused(true)
+	end
 
 	Iris.End()
 	Iris.PopConfig()

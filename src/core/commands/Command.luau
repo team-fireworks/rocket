@@ -25,8 +25,8 @@ function Command.isHeadless(self: Command)
 	return self._extension == nil
 end
 
-function Command.getAuthors(self: Command): { types.Author }
-	return self.interface.authors or self._extension.interface.authors or {}
+function Command.getcontributors(self: Command): { types.Author }
+	return self.interface.contributors or self._extension.interface.contributors or {}
 end
 
 function Command.getIcon(self: Command): string

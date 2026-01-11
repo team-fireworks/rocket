@@ -1,5 +1,6 @@
 -- TODO: virtual lists
 -- TODO: pagination
+-- FIXME: this leaks
 
 local ButtonGroup = require("../interactions/ButtonGroup")
 local Flex = require("../styles/Flex")
@@ -7,8 +8,8 @@ local Iris = require("@src/Iris")
 local Padding = require("../styles/Padding")
 local ScrollingFrame = require("./ScrollingFrame")
 local fzy = require("@include/fzy")
+local theme = require("@src/theme")
 local useKeys = require("@src/core/hooks/useKeys")
--- local theme = require("@src/theme")
 
 export type ListProps<T> = {
 	searchPlaceholder: string?,
@@ -21,6 +22,9 @@ export type ListProps<T> = {
 	renderEntry: (entry: T, props: ListProps<T>) -> (),
 	getEntryTitle: (entry: T, props: ListProps<T>) -> string,
 	getEntryTooltip: ((entry: T, props: ListProps<T>) -> string)?,
+
+	renderNoEntries: (props: ListProps<T>) -> ()?,
+	renderNoEntriesFromSearch: (search: string, props: ListProps<T>) -> ()?,
 
 	onEntrySelected: (T) -> ()?,
 }
@@ -50,6 +54,14 @@ local function defaultFilterEntries(search: string, props: ListProps<any>)
 	end)
 
 	return result
+end
+
+local function defaultRenderNoEntries(_: ListProps<any>)
+	Iris.Text({ "Try searching..." })
+end
+
+local function defaultRenderNoEntriesFromSearch(search: string, _props: ListProps<any>)
+	Iris.Text({ `No entries for "{search}".` })
 end
 
 --[=[
@@ -102,62 +114,69 @@ local function List<T>(props: ListProps<T>)
 	end
 
 	Iris.Separator()
-	Iris.PushConfig({ ItemSpacing = Vector2.new(Iris._config.ItemSpacing.X, 0) })
-	local scroller = ScrollingFrame({ size = UDim2.fromScale(1, 0), automaticSize = Enum.AutomaticSize.Y })
-	local selectedPosition, selectedSize = Vector2.zero, Vector2.zero
-	Flex(Enum.UIFlexMode.Fill)
-	Padding({ x = UDim.new(0, Iris._config.CellPadding.X), y = UDim.new(0, Iris._config.CellPadding.Y) })
-	local tooltipVisible = false
-	for i, entry in filtered do
-		local isSelected = i == newSelectedIndex
-		-- local buttonConfig = if isSelected
-		-- then theme.PRESETS.BUTTONS.HIGHLIGHTED
-		-- else theme.PRESETS.BUTTONS.UNHIGHLIGHTED
 
-		-- Iris.PushConfig(buttonConfig)
-		local button = ButtonGroup({ size = UDim2.fromScale(1, 0) })
-		local buttonInstance = button.Instance
-		buttonInstance.LayoutOrder = i + 100
-		if isSelected then
-			selectedPosition = buttonInstance.AbsolutePosition
-			selectedSize = buttonInstance.AbsoluteSize
+	if #filtered == 0 then
+		if search == nil :: any then
+			(props.renderNoEntries or defaultRenderNoEntries)(props)
+		else
+			(props.renderNoEntriesFromSearch or defaultRenderNoEntriesFromSearch)(search, props)
 		end
+	else
+		Iris.PushConfig({ ItemSpacing = Vector2.new(Iris._config.ItemSpacing.X, 0) })
+		local scroller = ScrollingFrame({ size = UDim2.fromScale(1, 0), automaticSize = Enum.AutomaticSize.Y })
+		local selectedPosition, selectedSize = Vector2.zero, Vector2.zero
+		Flex(Enum.UIFlexMode.Fill)
+		Padding({ x = UDim.new(0, Iris._config.CellPadding.X), y = UDim.new(0, Iris._config.CellPadding.Y) })
+		local tooltipVisible = false
+		for i, entry in filtered do
+			local isSelected = i == newSelectedIndex
+			Iris.PushConfig(if isSelected then theme.presets.button.highlighted else theme.presets.button.unhighlighted)
+			local button = ButtonGroup({ size = UDim2.fromScale(1, 0) })
+			local buttonInstance = button.Instance
+			buttonInstance.LayoutOrder = i + 100
+			if isSelected then
+				selectedPosition = buttonInstance.AbsolutePosition
+				selectedSize = buttonInstance.AbsoluteSize
+			end
 
-		props.renderEntry(entry, props)
+			props.renderEntry(entry, props)
+			Iris.End()
+			Iris.PopConfig()
+
+			if not tooltipVisible and props.getEntryTooltip and button.hovered() then
+				tooltipVisible = true
+				Iris.PushConfig({ WindowPadding = Iris.Internal._rootConfig.WindowPadding })
+				Iris.Tooltip({ props.getEntryTooltip(entry, props) })
+				Iris.PopConfig()
+			end
+
+			if props.onEntrySelected and button.clicked() then
+				props.onEntrySelected(entry)
+			end
+		end
 		Iris.End()
-		-- Iris.PopConfig()
+		Iris.PopConfig()
 
-		if not tooltipVisible and props.getEntryTooltip and button.hovered() then
-			tooltipVisible = true
-			Iris.Tooltip({ props.getEntryTooltip(entry, props) })
-		end
+		-- TODO: scrolling down is a bit janky
+		local sign = math.sign(newSelectedIndex - oldSelectedIndex)
+		if sign ~= 0 then
+			local scrollingFrame = scroller.Instance :: ScrollingFrame
 
-		if props.onEntrySelected and button.clicked() then
-			props.onEntrySelected(entry)
-		end
-	end
-	Iris.End()
-	Iris.PopConfig()
+			local canvasPosition = scrollingFrame.CanvasPosition
+			local frameTop = scrollingFrame.AbsolutePosition.Y + Iris._config.FramePadding.Y
+			local frameBottom = frameTop + scrollingFrame.AbsoluteWindowSize.Y + Iris._config.FramePadding.Y
 
-	-- TODO: scrolling down is a bit janky
-	local sign = math.sign(newSelectedIndex - oldSelectedIndex)
-	if sign ~= 0 then
-		local scrollingFrame = scroller.Instance :: ScrollingFrame
+			local itemTop = selectedPosition.Y
+			local itemBottom = itemTop + selectedSize.Y
 
-		local canvasPosition = scrollingFrame.CanvasPosition
-		local frameTop = scrollingFrame.AbsolutePosition.Y + Iris._config.FramePadding.Y
-		local frameBottom = frameTop + scrollingFrame.AbsoluteWindowSize.Y + Iris._config.FramePadding.Y
+			if itemTop < frameTop then
+				scrollingFrame.CanvasPosition = Vector2.new(canvasPosition.X, canvasPosition.Y - (frameTop - itemTop))
+			end
 
-		local itemTop = selectedPosition.Y
-		local itemBottom = itemTop + selectedSize.Y
-
-		if itemTop < frameTop then
-			scrollingFrame.CanvasPosition = Vector2.new(canvasPosition.X, canvasPosition.Y - (frameTop - itemTop))
-		end
-
-		if itemBottom > frameBottom then
-			scrollingFrame.CanvasPosition =
-				Vector2.new(canvasPosition.X, canvasPosition.Y + (itemBottom - frameBottom) + selectedSize.Y)
+			if itemBottom > frameBottom then
+				scrollingFrame.CanvasPosition =
+					Vector2.new(canvasPosition.X, canvasPosition.Y + (itemBottom - frameBottom) + selectedSize.Y)
+			end
 		end
 	end
 

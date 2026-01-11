@@ -14,7 +14,7 @@ local ext = createCoreExtension {
 	title = "Selection",
 	description = "Expanding, reducing, and transforming instance selections.",
 	icon = assets.extensions.selection,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.znotfireman },
 	},
 }
@@ -127,6 +127,38 @@ ext:newCommand({
 			pcall(game.Destroy, children)
 		end
 	end
+end)
+
+ext:newCommand({
+	id = "narrow-selection",
+	title = "Narrow Selection",
+	description = "Search to narrow the current selection down to one instance.",
+}, function(r: Extension.CommandRuntime)
+	local output = r:createCommandOutput()
+	local firstRun = true
+
+	output.windowConfig = { ItemSpacing = Vector2.new(8, 0), WindowPadding = Vector2.zero }
+	function output.renderWindow()
+		widgets.List({
+			captureFocus = firstRun,
+			entries = r:useSelection(),
+			getEntryTitle = function(entry: Instance)
+				return entry:GetFullName()
+			end,
+			renderEntry = function(entry: Instance)
+				Iris.Text({ entry.Name })
+				widgets.Subtext({ entry:GetFullName() })
+			end,
+			onEntrySelected = function(entry: Instance)
+				r:recordChangeHistory()
+				r:setSelection({ entry })
+				r:cleanup()
+			end,
+		} :: widgets.ListProps<Instance>)
+		firstRun = false
+	end
+
+	return output
 end)
 
 -- TODO: unfinished

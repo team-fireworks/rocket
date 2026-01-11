@@ -1,16 +1,20 @@
-local drawLine = require("../gizmos/drawLine")
+local drawDirection = require("../gizmos/drawDirection")
+local reflect = require("../utils/reflect")
 local types = require("../types")
 
-local line = {} :: types.Reposition
-line.name = "Line"
-line.describedBy = "a line that shadows will follow"
+local reposition = {} :: types.Reposition
+reposition.name = "Reflection"
+reposition.describedBy = "casting a reflection at your mouse"
 
-function line.updateDirection(initial, now, isGizmos)
-	local transform = CFrame.lookAt(now.mouseTransform.Position, initial.mouseTransform.Position)
+function reposition.updateDirection(_, now, isGizmos)
+	local reflection = reflect(now.mouseTransform.LookVector, Vector3.new(0, 1, 0))
+	local direction = CFrame.lookAt(now.mouseTransform.Position, now.mouseTransform.Position + reflection).LookVector
+
 	if isGizmos then
-		drawLine(initial.mouseTransform, now.mouseTransform)
+		drawDirection(now.mouseTransform.Position, direction)
 	end
-	return transform.LookVector
+
+	return direction
 end
 
-return line
+return reposition

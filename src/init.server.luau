@@ -16,11 +16,14 @@ local Iris = require("@self/Iris")
 local LauncherStore = require("@src/launcher/LauncherStore")
 local LauncherWindow = require("@src/launcher/LauncherWindow")
 local Log = require("@src/core/Log")
+local SettingsStore = require("@src/settings/SettingsStore")
+local SettingsWindow = require("@src/settings/SettingsWindow")
 local assets = require("@include/assets")
 local errors = require("@src/utils/errors")
 local ids = require("@src/utils/ids")
 local pluginTrove = require("@self/pluginTrove")
 local runCommand = require("@src/core/commands/runCommand")
+local theme = require("@self/theme")
 local types = require("@self/types")
 local useKeys = require("@src/core/hooks/useKeys")
 
@@ -62,7 +65,7 @@ local function renderCommandOutput(
 			return
 		end
 
-		-- isOpened:set(true)
+		isOpened:set(true)
 		runtimes[command]:cleanup()
 		Iris.End()
 	end
@@ -75,23 +78,33 @@ local function mountUi()
 		LauncherStore.selectedIndex(1)
 	end) :: any)
 
+	pluginTrove:Add(Charm.subscribe(SettingsStore.isVisible, function(isVisible)
+		if not isVisible then
+			SettingsStore.reset()
+		end
+	end) :: any)
+
 	local container = Instance.new("ScreenGui")
 	container.Name = "Rocket"
 	container.Parent = CoreGui
 
 	Iris.Init(container :: any)
 	Iris.UpdateGlobalConfig(Iris.TemplateConfig.sizeClear :: any)
-
-	-- Iris.UpdateGlobalConfig(theme.config())
-	-- pluginTrove:Add((Charm.subscribe :: any)(theme.config, Iris.UpdateGlobalConfig))
-	-- theme.observeStudio(pluginTrove)
+	Iris.UpdateGlobalConfig(theme.config())
+	pluginTrove:Add((Charm.subscribe :: any)(theme.config, Iris.UpdateGlobalConfig))
+	theme.observeStudio(pluginTrove)
 
 	pluginTrove:Add(Iris:Connect(function()
+		Charm.startBatch()
 		useKeys.store.previous = useKeys.store.now
 		useKeys.store.now = useKeys.getKeysDown()
 
 		if LauncherStore.isVisible() then
 			LauncherWindow()
+		end
+
+		if SettingsStore.isVisible() then
+			SettingsWindow()
 		end
 
 		local renderResults = CommandStore.uiOutputs()
@@ -101,6 +114,7 @@ local function mountUi()
 		end
 
 		Gizmos.step()
+		Charm.endBatch()
 	end) :: any)
 
 	pluginTrove:Add(Iris.Shutdown :: any)
@@ -125,12 +139,12 @@ local function mountToolbar()
 		toolbar:CreateButton(ids.rocket("launch"), "Launches the Rocket command palette", assets.brand.rocket, "Launch")
 	)
 
-	local _settingsButton = (
+	local settingsButton = (
 		toolbar:CreateButton(ids.rocket("settings"), "Configure Rocket", assets.brand.settings, "Settings")
 	)
 
 	bindVisibleToButton(LauncherStore.isVisible, launchButton)
-	-- bindVisibleToButton(SettingsStore.isVisible, settingsButton)
+	bindVisibleToButton(SettingsStore.isVisible, settingsButton)
 end
 
 local function createPluginAction(id: string, title: string, description: string, icon: string)

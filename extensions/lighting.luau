@@ -10,7 +10,7 @@ local ext = createCoreExtension {
 	title = "Lighting",
 	description = "Artist-friendly lighting control with visual control of the sun and moon.",
 	icon = assets.extensions.lighting.sun,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.znotfireman },
 	},
 }

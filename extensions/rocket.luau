@@ -12,7 +12,7 @@ local ext = createCoreExtension {
 	title = "Rocket",
 	description = "Basic Rocket utilities and commands.",
 	icon = assets.extensions.rocket,
-	authors = {
+	contributors = {
 		{ type = "user", id = constants.userIds.znotfireman },
 	},
 }
@@ -47,7 +47,9 @@ ext:newCommand({
 				return entry.interface.title
 			end,
 			renderEntry = function(entry: Command.Command)
+				Iris.Image({ entry:getIcon(), UDim2.fromOffset(18, 18) })
 				Iris.Text({ entry.interface.title })
+				widgets.Subtext({ entry._extension.interface.title })
 			end,
 			onEntrySelected = function(entry: Command.Command)
 				CommandStore.runtimes()[entry]:cleanup()
