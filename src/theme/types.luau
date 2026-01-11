@@ -1,6 +1,6 @@
 -- selene: allow(unused_variable)
 local Iris = require("@pkgs/Iris")
-local typeforge = require("@vendor/typeforge")
+local typeforge = require("@include/typeforge")
 
 export type Config = typeof(Iris._config)
 export type PartialConfig = typeforge.Partial<Config>

@@ -10,6 +10,8 @@ pesde.lock
 
 .DS_Store
 Thumbs.db
-src/assets.luau
+include/assets.luau
 
 Rocket.rbxm
+roblox.d.luau
+src/_OLD_

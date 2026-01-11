@@ -1,108 +1,69 @@
-local Iris = require("@src/Iris")
-local Theme = require("@theme/Theme")
-local launcher = require("@launcher/LauncherStore")
-local useViewportSize = require("@utils/useViewportSize")
+local Workspace = game:GetService("Workspace")
 
+local Command = require("@src/core/commands/Command")
+local Iris = require("@src/Iris")
+local LauncherStore = require("./LauncherStore")
+local runCommand = require("@src/core/commands/runCommand")
+local useKeys = require("@src/core/hooks/useKeys")
+local widgets = require("@src/widgets")
+
+local WINDOW_SIZE = Vector2.new(640, 284)
 local WINDOW_ARGS = {
 	"Rocket Launcher",
-	true, -- NoTitleBar
-	false, -- NoBackground
-	true, -- NoCollapse
-	true, -- NoClose
-	true, -- NoMove
-	false, -- NoScrollbar
-	true, -- NoResize
-	true, -- NoNav
-	true, -- NoMenu
+	[Iris.Args.Window.NoTitleBar] = true,
+	[Iris.Args.Window.NoBackground] = true,
+	[Iris.Args.Window.NoCollapse] = true,
+	[Iris.Args.Window.NoClose] = true,
+	[Iris.Args.Window.NoMove] = true,
+	[Iris.Args.Window.NoResize] = true,
+	[Iris.Args.Window.NoNav] = true,
+	[Iris.Args.Window.NoMenu] = true,
 }
 
 local function LauncherWindow()
-	local viewportSize = useViewportSize()
-	local windowSize = viewportSize / 2
-	Iris.PushConfig({
+	Iris.PushConfig {
 		WindowPadding = Vector2.zero,
 		ContentWidth = UDim.new(1, 0),
-	})
-	Iris.Window(WINDOW_ARGS, { position = windowSize / 2, size = windowSize } :: any)
+		ItemSpacing = Vector2.new(8, 0),
+	}
 
-	Iris.PushConfig({
-		FrameRounding = 0,
-		FramePadding = Iris._config.FramePadding * 2,
-	})
-	local commandToRender, commandContext = launcher.commandToRender, launcher.commandContext
-	if commandToRender and commandContext then
-		local render, renderNav =
-			commandToRender._metadata.renderInLauncher, commandToRender._metadata.renderInLauncherNav
+	local viewportSize = Workspace.CurrentCamera.ViewportSize
+	local windowPosition = viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100)
+	local window = Iris.Window(WINDOW_ARGS, { position = windowPosition, size = WINDOW_SIZE } :: any)
+	window.state.position:set(viewportSize / 2 - WINDOW_SIZE / 2 - Vector2.new(0, 100))
 
-		if renderNav then
-			Iris.SameLine()
-		end
-		local back = Iris.Button("Back")
-		if renderNav then
-			renderNav(commandContext)
-			Iris.End()
-		end
-
-		Iris.PopConfig()
-		Iris.Separator()
-
-		if render then
-			render(commandContext)
-		end
-
-		if back.clicked() then
-			commandContext.trove:Clean()
-		end
-	else
-		local input = Iris.InputText({ "", "Search commands..." })
-		Iris.PopConfig()
-		Iris.Separator()
-
-		local inputField = input.Instance:FindFirstChildOfClass("TextBox")
-		launcher.search(inputField and inputField.Text or "")
-		if not launcher.isFocused() and inputField then
-			launcher.isFocused(true)
-			inputField:CaptureFocus()
-		end
-
-		Iris.ScrollingFrame(UDim2.fromScale(1, 0), Enum.AutomaticSize.None)
-		Iris.Flex(Enum.UIFlexMode.Fill)
-
-		-- TODO: proper padding widget
-		local paddingInstance = Instance.new("UIPadding")
-		local horizontalPadding = UDim.new(0, Iris._config.CellPadding.X)
-		local verticalPadding = UDim.new(0, Iris._config.CellPadding.Y)
-		paddingInstance.PaddingLeft = horizontalPadding
-		paddingInstance.PaddingRight = horizontalPadding
-		paddingInstance.PaddingTop = verticalPadding
-		paddingInstance.PaddingBottom = verticalPadding
-		Iris.Append(paddingInstance :: any)
-
-		local selectedIndex = launcher.selectedIndex()
-		for i, cmd in launcher.searchResults() do
-			Theme.push(
-				if selectedIndex == i then Theme.presets.button.highlighted else Theme.presets.button.unhighlighted
-			)
-
-			local button = Iris.ButtonGroup()
-			button.Instance.Size = UDim2.fromScale(1, 0)
-			button.Instance.LayoutOrder = i
-
-			Iris.Icon(cmd._metadata.icon or cmd._extension._metadata.icon, UDim2.fromOffset(18, 18))
-			Iris.Text(cmd._metadata.title)
-
-			Theme.push(Theme.presets.subtext)
-			Iris.Text(cmd._extension._metadata.title)
-			Iris.PopConfig()
-
-			Iris.End()
-			Iris.PopConfig()
-
-			if button.clicked() then
-				launcher.runCommand:Fire(cmd)
-			end
-		end
+	if window.closed() or useKeys.andConsumePress(Enum.KeyCode.Escape) then
+		LauncherStore.isVisible(false)
 		Iris.End()
+		Iris.PopConfig()
+		return
+	end
+
+	widgets.List({
+		onSearchChange = LauncherStore.search,
+		captureFocus = LauncherStore.isFocused(),
+		entries = LauncherStore.searchResults(),
+		getEntryTitle = function(command: Command.Command)
+			return command.interface.title
+		end,
+		getEntryTooltip = function(command: Command.Command)
+			return command.interface.description
+		end,
+		renderEntry = function(command: Command.Command)
+			Iris.Image({ command:getIcon(), UDim2.fromOffset(18, 18) })
+			Iris.Text({ command.interface.title })
+			widgets.Subtext({ command._extension.interface.title })
+			widgets.FlexSpacer(Enum.UIFlexMode.Fill)
+			widgets.Subtext({ "Command" })
+		end,
+		onEntrySelected = function(command: Command.Command)
+			LauncherStore.isVisible(false)
+			task.defer(runCommand, command)
+		end,
+	} :: widgets.ListProps<Command.Command>)
+
+	if not LauncherStore.isFocused() then
+		LauncherStore.isFocused(true)
 	end
 
 	Iris.End()

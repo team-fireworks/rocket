@@ -1,16 +1,11 @@
 {
-	"languageMode": "strict",
-	"lint": {
-		"*": true
-	},
-	"aliases": {
-		"lune": "~/.lune/.typedefs/0.10.4/",
-		"pkgs": "roblox_packages",
-		"src": "src",
-		"launcher": "src/launcher",
-		"settings": "src/settings",
-		"theme": "src/theme",
-		"utils": "src/utils",
-		"vendor": "vendor"
-	}
+    "languageMode": "strict",
+    "aliases": {
+        "src": "src",
+        "include": "include",
+        "pkgs": "roblox_packages"
+    },
+    "lint": {
+        "*": true
+    }
 }

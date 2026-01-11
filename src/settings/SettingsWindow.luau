@@ -1,34 +1,27 @@
-local Iris = require("@pkgs/Iris")
-local SettingsContent = require("@settings/SettingsContent")
-local SettingsSidebar = require("@settings/SettingsSidebar")
-local SettingsStore = require("@settings/SettingsStore")
-local useViewportSize = require("@src/utils/useViewportSize")
+local Workspace = game:GetService("Workspace")
 
-local SIDEBAR_WIDTH = 200
+local Iris = require("@pkgs/Iris")
+local SettingsPages = require("./SettingsPages")
+local SettingsSidebar = require("./SettingsSidebar")
+local SettingsStore = require("./SettingsStore")
+
+local SIDEBAR_WIDTH = 256
 local WINDOW_ARGS = {
 	"Rocket Settings",
-	true, -- NoTitleBar
-	false, -- NoBackground
-	true, -- NoCollapse
-	true, -- NoClose
-	true, -- NoMove
-	true, -- NoScrollbar
-	true, -- NoResize
-	false, -- NoNav
-	false, -- NoMenu
+	[Iris.Args.Window.NoCollapse] = true,
+	[Iris.Args.Window.NoMove] = true,
+	[Iris.Args.Window.NoResize] = true,
 }
 
 local function SettingsWindow()
-	Iris.PushConfig({
-		WindowPadding = Vector2.zero,
-		CellPadding = Iris._config.CellPadding * 2,
-	})
-
-	local viewportSize = useViewportSize()
+	Iris.PushConfig({ WindowPadding = Vector2.zero })
+	local viewportSize = Workspace.CurrentCamera.ViewportSize
 	local windowSize = viewportSize * 0.8
 	local windowState: any = { position = (viewportSize - windowSize) / 2, size = windowSize }
-	if Iris.Window(WINDOW_ARGS, windowState).closed() then
+	local window = Iris.Window(WINDOW_ARGS, windowState)
+	if window.closed() then
 		SettingsStore.isVisible(false)
+		window.state.isOpened:set(true)
 		Iris.End()
 		Iris.PopConfig()
 		return
@@ -38,9 +31,12 @@ local function SettingsWindow()
 	layout.state.widths:set({ SIDEBAR_WIDTH, windowSize.X - SIDEBAR_WIDTH })
 	layout.Instance.Size = UDim2.new(layout.Instance.Size.X.Scale, layout.Instance.Size.X.Offset, 1, 0)
 		- UDim2.fromOffset(0, Iris._config.CellPadding.Y)
-	SettingsSidebar()
-	Iris.NextColumn()
-	SettingsContent()
+	do
+		SettingsSidebar()
+		Iris.NextColumn()
+		local currentPage = SettingsStore.currentPage() or SettingsPages[1]
+		currentPage.render()
+	end
 	Iris.End()
 
 	Iris.End()

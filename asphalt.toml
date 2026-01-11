@@ -10,4 +10,4 @@ strip_extensions = true
 
 [inputs.assets]
 path = "assets/**/*"
-output_path = "src"
+output_path = "include"

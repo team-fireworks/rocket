@@ -1,1 +1,4 @@
 std = "selene-std"
+
+[lints]
+mixed_table = "allow"

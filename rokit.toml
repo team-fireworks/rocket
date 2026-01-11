@@ -6,8 +6,8 @@
 [tools]
 luau-lsp = "JohnnyMorganz/luau-lsp@1.58.0"
 rojo = "rojo-rbx/rojo@7.6.1"
-lune = "lune-org/lune@0.10.4"
 StyLua = "JohnnyMorganz/StyLua@2.3.1"
 darklua = "seaofvoices/darklua@0.17.3"
 selene = "Kampfkarren/selene@0.29.0"
 asphalt = "jackTabsCode/asphalt@1.2.0"
+lute = "luau-lang/lute@0.1.0-nightly.20260106"

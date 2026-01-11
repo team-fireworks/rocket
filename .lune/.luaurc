@@ -1,6 +1,0 @@
-{
-	"aliases": {
-		"lune": "~/.lune/.typedefs/0.10.4/",
-		"pkgs": "../lune_packages"
-	}
-}
