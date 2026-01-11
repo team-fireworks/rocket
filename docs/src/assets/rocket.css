@@ -1,0 +1,128 @@
+:root {
+	--sl-font: "Source Sans Pro", sans-serif;
+
+	--sl-color-accent-low: #460b05;
+	--sl-color-accent: #c60e00;
+	--sl-color-accent-high: #feb3a6;
+	--sl-color-white: #ffffff;
+	--sl-color-gray-1: #f3ecea;
+	--sl-color-gray-2: #c8c0be;
+	--sl-color-gray-3: #978784;
+	--sl-color-gray-4: #635451;
+	--sl-color-gray-5: #423432;
+	--sl-color-gray-6: #302321;
+	--sl-color-black: #1d1715;
+}
+
+:root[data-theme="light"] {
+	--sl-color-accent-low: #ffc8be;
+	--sl-color-accent: #c90e00;
+	--sl-color-accent-high: #640300;
+	--sl-color-white: #1d1715;
+	--sl-color-gray-1: #302321;
+	--sl-color-gray-2: #423432;
+	--sl-color-gray-3: #635451;
+	--sl-color-gray-4: #978784;
+	--sl-color-gray-5: #c8c0be;
+	--sl-color-gray-6: #f3ecea;
+	--sl-color-gray-7: #f9f5f5;
+	--sl-color-black: #ffffff;
+}
+
+body {
+	background: linear-gradient(
+		var(--sl-color-accent-low),
+		color-mix(in lab, var(--sl-color-accent), var(--sl-color-accent-low))
+	);
+}
+
+.hero {
+	display: flex;
+	flex-direction: column-reverse;
+
+	& h1:nth-child(1) {
+		font-weight: 700;
+	}
+
+	& .copy {
+		text-align: center;
+		align-items: center;
+		justify-content: center;
+
+		& .tagline {
+			max-width: 75ch;
+			line-height: 120%;
+		}
+	}
+
+	& .actions {
+		text-align: center;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem 1rem;
+	}
+
+	& img {
+		width: min(100%, 10rem);
+	}
+}
+
+.sl-link-button {
+	flex-direction: row-reverse;
+	padding: 0.875rem 0.875rem;
+	border: none;
+	border-radius: 0.5rem;
+
+	&.primary {
+		background-color: var(--sl-color-gray-1);
+
+		&:hover {
+			background-color: var(--sl-color-gray-2);
+		}
+	}
+
+	&.secondary {
+		background-color: rgb(from var(--sl-color-gray-1) r g b / 20%);
+
+		&:hover {
+			background-color: rgb(from var(--sl-color-gray-1) r g b / 15%);
+		}
+	}
+
+	transition: background-color 100ms ease-out;
+}
+
+.sidebar-pane {
+	border-color: rgb(from var(--sl-color-gray-1) r g b / 15%);
+}
+
+.header {
+	border: none;
+	background: linear-gradient(
+		var(--sl-color-accent-low),
+		color-mix(
+			in lab,
+			var(--sl-color-accent-low),
+			rgb(from var(--sl-color-accent-low) r g b / 0%)
+		)
+	);
+}
+
+.right-sidebar {
+	border-color: rgb(from var(--sl-color-gray-1) r g b / 15%);
+}
+
+.main-pane {
+	& .content-panel:nth-child(2) {
+		border-color: rgb(from var(--sl-color-gray-1) r g b / 15%);
+	}
+}
+
+.pagination-links a {
+	border-color: rgb(from var(--sl-color-gray-1) r g b / 15%);
+	transition: border-color 100ms ease-out;
+
+	&:hover {
+		border-color: rgb(from var(--sl-color-gray-1) r g b / 30%);
+	}
+}

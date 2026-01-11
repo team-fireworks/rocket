@@ -6,6 +6,8 @@
       "name": "docs",
       "dependencies": {
         "@astrojs/starlight": "^0.37.2",
+        "@fontsource-variable/inconsolata": "^5.2.8",
+        "@fontsource/source-sans-pro": "^5.2.5",
         "astro": "^5.6.1",
         "sharp": "^0.34.2",
       },
@@ -103,6 +105,10 @@
     "@expressive-code/plugin-shiki": ["@expressive-code/plugin-shiki@0.41.5", "", { "dependencies": { "@expressive-code/core": "^0.41.5", "shiki": "^3.2.2" } }, "sha512-gw6OWvnmDmvcKJ5AZSzl2VkuixJMQ/zWSwPLFNzitqCa8aPfIFunb0K8IIOsE43LELgOWkie9lRFspOxwDVwrg=="],
 
     "@expressive-code/plugin-text-markers": ["@expressive-code/plugin-text-markers@0.41.5", "", { "dependencies": { "@expressive-code/core": "^0.41.5" } }, "sha512-0DSiTsjWFEz6/iuLOGNNy2GaeCW41OwnVJMKx1tS+XKeQxAL89UkZP3egWNzxjWNHNMzEv3ZWWWYqbonEQlv/Q=="],
+
+    "@fontsource-variable/inconsolata": ["@fontsource-variable/inconsolata@5.2.8", "", {}, "sha512-IXXYUznF45QyPG05Q7NgsVFa4i1HnVyqbfEGLlHidZRElO0T3PCq6y+Vlz9nT4rnqsLqAkdi4wjhsoJey6pYTg=="],
+
+    "@fontsource/source-sans-pro": ["@fontsource/source-sans-pro@5.2.5", "", {}, "sha512-ypendqc4pYUc+EgF7qqPY9iVYEz1t/Qr03VojKxG/2g3dnpHa1B6DOlDxWQjQXDj5QrG6inEqGT0g+edjALZyg=="],
 
     "@img/colour": ["@img/colour@1.0.0", "", {}, "sha512-A5P/LfWGFSl6nsckYtjw9da+19jB8hkJ6ACTGcDfEJ0aE+l2n2El7dsVM7UVHZQ9s2lmYMWlrS21YLy2IR1LUw=="],
 
