@@ -4,5 +4,6 @@
 return table.freeze({
 	createCommand = require("@self/createCommand"),
 	createCommandRuntime = require("@self/createCommandRuntime"),
+	createCoreExtension = require("@self/createCoreExtension"),
 	createExtension = require("@self/createExtension"),
 })

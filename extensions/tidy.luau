@@ -1,6 +1,6 @@
 local Extension = require("@src/core/Extension")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 local ext = createCoreExtension({
@@ -9,7 +9,7 @@ local ext = createCoreExtension({
 	description = "Keep your game organized.",
 	icon = assets.extensions.rocket,
 	contributors = {
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 })
 

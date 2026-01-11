@@ -4,8 +4,8 @@ local Workspace = game:GetService("Workspace")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
 local RegExp = require("@pkgs/RegExp")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local widgets = require("@src/widgets")
 
@@ -15,7 +15,7 @@ local ext = createCoreExtension {
 	description = "Expanding, reducing, and transforming instance selections.",
 	icon = assets.extensions.selection,
 	contributors = {
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 }
 

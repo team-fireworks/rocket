@@ -2,8 +2,8 @@ local Command = require("@src/core/commands/Command")
 local CommandStore = require("@src/core/commands/CommandStore")
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local widgets = require("@src/widgets")
 
@@ -13,7 +13,7 @@ local ext = createCoreExtension {
 	description = "Basic Rocket utilities and commands.",
 	icon = assets.extensions.rocket,
 	contributors = {
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 }
 

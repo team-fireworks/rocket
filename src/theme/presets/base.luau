@@ -67,8 +67,8 @@ local base: types.PartialConfig = {
 	-- ContentWidth = UDim.new(1, 0),
 	ContentHeight = UDim.new(0, 0),
 
-	WindowPadding = Vector2.new(12, 8),
-	WindowResizePadding = Vector2.new(8, 8),
+	WindowPadding = Vector2.new(4, 4),
+	WindowResizePadding = Vector2.new(4, 4),
 	FramePadding = Vector2.new(6, 4),
 	ItemSpacing = Vector2.new(8, 0),
 	ItemInnerSpacing = Vector2.new(8, 8),

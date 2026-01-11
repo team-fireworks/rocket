@@ -8,8 +8,8 @@ local UserInputService = game:GetService("UserInputService")
 local Extension = require("@src/core/Extension")
 local Gizmos = require("@src/core/Gizmos")
 local Iris = require("@src/Iris")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
 local FACE_AXES: { [Enum.NormalId]: { normal: Vector3, u: Vector3, v: Vector3 } } = {
@@ -33,8 +33,8 @@ local ext = createCoreExtension({
 	description = "Create smooth arcs from the selected parts.",
 	icon = assets.extensions.rocket,
 	contributors = {
-		{ type = "user", id = constants.userIds.syylvi },
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.syylvi },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 })
 

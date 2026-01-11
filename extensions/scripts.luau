@@ -2,8 +2,8 @@ local ScriptEditorService = game:GetService("ScriptEditorService")
 
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local pluginTrove = require("@src/pluginTrove")
 local widgets = require("@src/widgets")
@@ -14,7 +14,7 @@ local ext = createCoreExtension {
 	description = "TBA",
 	icon = assets.extensions.rocket,
 	contributors = {
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 }
 

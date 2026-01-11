@@ -1,4 +1,5 @@
 local Extension = require("@src/core/Extension")
+local Tags = require("@src/constants/Tags")
 local assets = require("@include/assets")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 
@@ -10,15 +11,13 @@ local ext = createCoreExtension {
 	contributors = { "Team Fireworks" },
 }
 
-local TRUSS_FILLER_TAG = `Rocket Geometry: Truss Filler`
-
 local function fill(truss: TrussPart)
 	local filler: BasePart
 	local fillerName = "TrussFill"
 
 	local existing = truss:FindFirstChild(fillerName)
 	if existing then
-		if existing:IsA("BasePart") and existing:HasTag(TRUSS_FILLER_TAG) then
+		if existing:IsA("BasePart") and existing:HasTag(Tags.TRUSS_FILLER) then
 			filler = existing
 		else
 			existing:Destroy()
@@ -39,7 +38,7 @@ local function fill(truss: TrussPart)
 	filler.Transparency = truss.Transparency
 
 	filler.Parent = truss
-	filler:AddTag(TRUSS_FILLER_TAG)
+	filler:AddTag(Tags.TRUSS_FILLER)
 
 	return filler
 end
@@ -61,27 +60,27 @@ ext:newCommand({
 	id = `fill-trusses`,
 	title = `Fill Trusses`,
 	description = `Fills the insides of selected TrussParts, then selects the fills.`,
-}, function(context: Extension.CommandRuntime)
-	context:recordChangeHistory()
-	context:setSelection(fillRecursive(context:useSelection()))
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
+	r:setSelection(fillRecursive(r:useSelection()))
 end)
 
 ext:newCommand({
 	id = "delete-truss-fill",
 	title = "Delete Truss Fill",
 	description = "Deletes fills in selected TrussParts that was created by this extension.",
-}, function(context: Extension.CommandRuntime)
-	context:recordChangeHistory()
+}, function(r: Extension.CommandRuntime)
+	r:recordChangeHistory()
 
-	for _, selected in context:useSelection() do
-		if selected:HasTag(TRUSS_FILLER_TAG) then
-			selected:Destroy()
+	for _, selected in r:useSelection() do
+		if selected:HasTag(Tags.TRUSS_FILLER) then
+			pcall(game.Destroy, selected)
 			continue
 		end
 
 		for _, descendant in selected:GetDescendants() do
-			if descendant:HasTag(TRUSS_FILLER_TAG) then
-				descendant:Destroy()
+			if descendant:HasTag(Tags.TRUSS_FILLER) then
+				pcall(game.Destroy, descendant)
 			end
 		end
 	end

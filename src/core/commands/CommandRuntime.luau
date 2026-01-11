@@ -47,7 +47,12 @@ CommandRuntime.fzy = fzy
 CommandRuntime.Gizmos = Gizmos
 CommandRuntime.Iris = Iris
 
-export type CommandRuntime = setmetatable<{ trove: Trove.Trove, command: any, log: Log.Log }, typeof(CommandRuntime)>
+export type CommandRuntime = setmetatable<{
+	trove: Trove.Trove,
+	command: any,
+	log: Log.Log,
+	isFirstRun: boolean,
+}, typeof(CommandRuntime)>
 
 -- Command
 function CommandRuntime.cleanup(self: CommandRuntime)

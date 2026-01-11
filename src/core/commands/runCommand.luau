@@ -28,6 +28,7 @@ local function runCommand(command: Command.Command)
 	runtime.log:trace("Running command", command:getFullId())
 
 	local runSuccess, runOutput: types.CommandOutput = pcall(command._runner :: any, runtime)
+	runtime.isFirstRun = false
 	if runSuccess then
 		local output = types.CommandOutput:cast(runOutput)
 		if isOutputsUi(output) then

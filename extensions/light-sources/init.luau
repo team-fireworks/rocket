@@ -3,8 +3,8 @@ local UserInputService = game:GetService("UserInputService")
 
 local Extension = require("@src/core/Extension")
 local Iris = require("@src/Iris")
+local UserIds = require("@src/constants/UserIds")
 local assets = require("@include/assets")
-local constants = require("@src/constants")
 local createCoreExtension = require("@src/core/constructors/createCoreExtension")
 local getRepositionState = require("@self/utils/getRepositionState")
 local repositions = require("@self/repositions")
@@ -17,7 +17,7 @@ local ext = createCoreExtension {
 	description = "Artist-friendly visual control of the sun, the moon, and light instances.",
 	icon = assets.extensions.lighting.sun,
 	contributors = {
-		{ type = "user", id = constants.userIds.znotfireman },
+		{ type = "user", id = UserIds.znotfireman },
 	},
 }
 
