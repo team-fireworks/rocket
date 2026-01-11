@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 
-local THUMBNAIL_STRING_TEMPLATE = "rbxthumb://type=%s&id=%s&w=%s&h=%s"
 local THUMBNAIL_NAMES: { [EnumItem]: string } = {
 	[Enum.ThumbnailType.HeadShot] = "AvatarHeadShot",
 	[Enum.ThumbnailType.AvatarThumbnail] = "Avatar",
