@@ -151,7 +151,7 @@ ext.IsClass = ({} :: any) :: Instances
 -- casting to any to disable luau-lsp metatable magic function, which breaks
 -- autocomplete
 setmetatable(ext.IsA :: any, table.freeze({
-	__index = function(self: Instances, className: string)
+	__index = function(instances: Instances, className: string)
 		local instanceBoba = Boba.new(className, function(self, x)
 			if typeof(x) == "Instance" then
 				if x:IsA(className) then
@@ -162,13 +162,13 @@ setmetatable(ext.IsA :: any, table.freeze({
 			return self:fail(`expected an Instance, but {quoteGot(x)}`)
 		end :: any);
 
-		(self :: any)[className] = instanceBoba
+		(instances :: any)[className] = instanceBoba
 		return instanceBoba
 	end
 }))
 
 setmetatable(ext.IsClass :: any, table.freeze({
-	__index = function(self: Instances, className: string)
+	__index = function(instances: Instances, className: string)
 		local instanceBoba = Boba.new(className, function(self, x)
 			if typeof(x) == "Instance" then
 				if x.ClassName == className then
@@ -179,7 +179,7 @@ setmetatable(ext.IsClass :: any, table.freeze({
 			return self:fail(`expected an Instance, but {quoteGot(x)}`)
 		end :: any);
 
-		(self :: any)[className] = instanceBoba
+		(instances :: any)[className] = instanceBoba
 		return instanceBoba
 	end
 }))
