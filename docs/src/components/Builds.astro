@@ -1,0 +1,131 @@
+---
+import { LinkButton } from "@astrojs/starlight/components";
+
+interface WorkflowRun {
+	id: number;
+	head_sha: string;
+	path: string;
+	display_title: string;
+	html_url: string;
+	artifacts_url: string;
+
+	head_commit: {
+		timestamp: string;
+	};
+}
+
+interface ListWorkflowRunsResult {
+	workflow_runs: WorkflowRun[];
+}
+
+interface Artifact {
+	id: number;
+	name: "Plugin";
+}
+
+const LIST_WORKFLOW_RUNS =
+	"https://api.github.com/repos/team-fireworks/rocket/actions/runs?status=success";
+const BUILD_WORKFLOW_PATH = ".github/workflows/build.yaml";
+
+const HEADERS: HeadersInit = {
+	Accept: "application/vnd.github+json",
+	"X-GitHub-Api-Version": "2022-11-28",
+};
+
+const REQUEST_INFO: RequestInit = {
+	method: "GET",
+	headers: HEADERS,
+};
+
+const request = new Request(LIST_WORKFLOW_RUNS, REQUEST_INFO);
+const result = await fetch(request).then(
+	(r): Promise<ListWorkflowRunsResult> => r.json(),
+);
+
+const runs = result.workflow_runs
+	.filter((run) => run.path === BUILD_WORKFLOW_PATH)
+	.slice(0, 19);
+
+console.log(runs);
+
+const allArtifacts = await Promise.all(
+	runs.map((run) =>
+		fetch(new Request(run.artifacts_url, REQUEST_INFO))
+			.then((r) => r.json())
+			.then(({ artifacts }): Artifact[] => artifacts),
+	),
+);
+---
+
+{
+	runs.map((run, index) => {
+		const artifacts = allArtifacts[index];
+		const pluginArtifact = artifacts.find(({ name }) => name === "Plugin");
+
+		if (!pluginArtifact) return;
+
+		const timestamp = new Date(run.head_commit.timestamp).toLocaleString();
+
+		const commitUrl = `https://github.com/team-fireworks/rocket/commit/${run.head_sha}`;
+		const downloadUrl = `https://github.com/team-fireworks/rocket/actions/runs/${run.id}/artifacts/${pluginArtifact.id}`;
+
+		return (
+			<section class="rocket-build">
+				<div class="rocket-build-info">
+					<h4 class="rocket-build-title">
+						<a href={run.html_url}>{run.display_title}</a>
+					</h4>
+					<div class="rocket-build-metadata">
+						<span>{timestamp}</span>
+						<a href={commitUrl} class="rocket-build-commit">
+							Commit: {run.head_sha.slice(0, 6)}
+						</a>
+					</div>
+				</div>
+				<LinkButton
+					href={downloadUrl}
+					variant="primary"
+					icon="download"
+				>
+					Download
+				</LinkButton>
+			</section>
+		);
+	})
+}
+
+<style>
+	.rocket-build {
+		padding: 1rem;
+		background-color: var(--sl-color-black);
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		display: flex;
+		align-items: center;
+
+		.rocket-build-info {
+			flex-grow: 1;
+		}
+
+		.rocket-build-title a {
+			font-weight: 600;
+			text-decoration: none;
+			color: var(--sl-color-white);
+		}
+
+		.sl-link-button {
+			margin-block: 0;
+			margin-inline-end: 0;
+		}
+
+		.rocket-build-metadata {
+			display: flex;
+			gap: 1rem;
+			margin-top: 0;
+
+			* {
+				color: var(--sl-color-gray-3) !important;
+			}
+		}
+	}
+</style>

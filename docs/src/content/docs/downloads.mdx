@@ -1,0 +1,39 @@
+---
+title: Download Rocket
+description: A reference page in my new Starlight docs site.
+template: splash
+sidebar:
+  hidden: true
+---
+
+import { Tabs, TabItem, Aside, LinkButton, Steps } from '@astrojs/starlight/components';
+
+## Installing Rocket
+
+Pre-Alpha builds of the Rocket plugin can be installed below.
+
+### Automated Builds
+
+There are automated builds for most commits in Rocket. The built plugin
+models are stored as GitHub Actions artifacts and can be downloaded below.
+
+<Tabs>
+  <TabItem label="Download Builds">
+    <Aside type="note">
+      Work in progress, currently GitHub ratelimits are too harsh.
+    </Aside>
+  </TabItem>
+  <TabItem label="Download Manually">
+    <Aside type="note">
+      You must have be signed into GitHub to download the development builds.
+    </Aside>
+
+    <Steps>
+    1.  [Visit the runs for the `build` GitHub action.](https://github.com/team-fireworks/rocket/actions/workflows/build.yaml)
+    2.  Click on the name of a run, the latest commit is placed at the top.
+    3.  Find "Plugin" under Artifacts, then click the download button.
+    4.  Once downloaded, unzip to get the plugin model, and proceed to
+        installation.
+    </Steps>
+  </TabItem>
+</Tabs>

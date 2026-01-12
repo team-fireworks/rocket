@@ -26,12 +26,21 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
-					label: "Guides",
+					label: "Getting Started",
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: "Example Guide", slug: "guides/example" },
-						{ label: "Temp Guide", slug: "temp" },
+						{ label: "Download Rocket", slug: "downloads" },
+						{
+							label: "Welcome To Rocket",
+							slug: "getting-started/welcome-to-rocket",
+						},
+						{ label: "Keybinds", slug: "getting-started/keybinds" },
+						{ label: "Search", slug: "getting-started/search" },
+						{ label: "Settings", slug: "getting-started/settings" },
 					],
+				},
+				{
+					label: "Core Extensions",
+					autogenerate: { directory: "core-extensions" },
 				},
 				{
 					label: "Reference",
