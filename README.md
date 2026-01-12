@@ -17,10 +17,10 @@
 
 ## Features
 
--   **Powerful:** Forget installing 20 other plugins, Rocket is bundled with a
-	versatile suite of core extensions
--   **Speed of Thought:** One menu to launch commands, with fuzzy searching and
-	shortcuts, alongside settings to make Rocket yours
+-   **Powerful:** Rocket replaces your 20 plugins with the batteries-included
+	suite of versatile core extensions
+-   **Supercharger:** One menu to launch commands, with fuzzy searching and
+	shortcuts, alongside settings to align Rocket with your workflow
 -   **Extensible:** Write and use third-party extensions with command arguments, 
 	preferences, and UI via Iris
 
