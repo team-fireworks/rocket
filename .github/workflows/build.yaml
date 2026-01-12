@@ -1,4 +1,4 @@
-name: build
+name: Rocket Development Builds
 
 on:
     push:
